@@ -1,0 +1,30 @@
+# --- Environnement & Secrets ---
+.env
+*.log
+.secrets
+
+# --- Python & Backend ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+ENV/
+.pytest_cache/
+
+# --- Angular Frontend ---
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+
+# --- Stockage local & Data ---
+# On ignore les fichiers d'uploads mais on garde la structure des dossiers
+storage/uploads/cvs/*
+storage/uploads/tenders/*
+storage/processed/*
+storage/exports/*
+!**/		# Permet de ne pas ignorer la structure des sous-dossiers vides
+!**.gitkeep # Si tu as mis des fichiers .gitkeep pour pousser les dossiers vides
+
+# --- Docker & DB locales ---
+.docker/
+elasticsearch/data/
