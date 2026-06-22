@@ -1,0 +1,51 @@
+<div class="list-container">
+  <h2>📋 Liste des Appels d'Offres</h2>
+  
+  <button routerLink="/upload" style="margin-bottom: 15px; padding: 10px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 4px;">
+    + Analyser un nouveau PDF
+  </button>
+
+  <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
+    <thead>
+      <tr style="background-color: #f2f2f2;">
+        <th style="padding: 10px; width: 60px;">N°</th>
+        <th style="padding: 10px;">Référence</th>
+        <th style="padding: 10px;">Statut</th>
+        <th style="padding: 10px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let tender of tenders; let i = index">
+        
+        <td style="padding: 10px;">{{ i + 1 }}</td>
+        
+        <td style="padding: 10px;">{{ tender.reference }}</td>
+        
+        <td style="padding: 10px;">
+          <span *ngIf="tender.status === 'Analysé' || tender.extracted_data" style="color: green; font-weight: bold;">✔ Analysé</span>
+          <span *ngIf="tender.status === 'En attente' && !tender.extracted_data" style="color: red;">⏳ En attente</span>
+        </td>
+        
+        <td style="padding: 10px;">
+          <button [routerLink]="['/details', tender.id]" style="margin-right: 10px; padding: 6px 12px; cursor: pointer; background-color: #9C27B0; color: white; border: none; border-radius: 4px;">
+            👁️ Détails
+          </button>
+
+          <button [routerLink]="['/editor', tender.id]" style="margin-right: 10px; padding: 6px 12px; cursor: pointer; background-color: #2196F3; color: white; border: none; border-radius: 4px;">
+            ✏️ Modifier
+          </button>
+
+          <button (click)="deleteTender(tender.id)" style="padding: 6px 12px; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 4px;">
+            🗑️ Supprimer
+          </button>
+        </td>
+      </tr>
+      
+      <tr *ngIf="tenders.length === 0">
+        <td colspan="4" style="text-align: center; padding: 20px; font-style: italic; color: #666;">
+          Aucun appel d'offres pour le moment.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

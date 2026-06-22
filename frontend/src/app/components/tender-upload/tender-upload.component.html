@@ -1,0 +1,99 @@
+<div class="upload-container" style="max-width: 550px; margin: 60px auto; padding: 40px 30px; background: #ffffff; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); font-family: 'Segoe UI', Arial, sans-serif; border-top: 5px solid #3f51b5;">
+  
+  <div style="margin-bottom: 25px;">
+    <button routerLink="/" style="padding: 8px 15px; cursor: pointer; background-color: #f1f2f6; border: none; border-radius: 6px; font-weight: bold; color: #57606f; transition: background-color 0.2s;">
+      ⬅ Retour à la liste
+    </button>
+  </div>
+
+  <div style="text-align: center; margin-bottom: 35px;">
+    <div style="font-size: 45px; margin-bottom: 10px;">📄</div>
+    <h2 style="color: #2c3e50; margin: 0 0 10px 0; font-size: 24px;">Nouvel Appel d'Offres</h2>
+    <p style="color: #7f8c8d; font-size: 14px; margin: 0;">Uploadez votre fichier PDF et indiquez les pages à analyser par l'Intelligence Artificielle.</p>
+  </div>
+
+  <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()">
+    
+    <div style="display: flex; flex-direction: column; gap: 25px;">
+      
+      <div>
+        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #34495e; font-size: 14px;">
+          Titre de l'appel d'offres :
+        </label>
+        <input 
+          type="text" 
+          formControlName="title"
+          placeholder="Ex: Refonte du système d'information" 
+          style="width: 100%; padding: 12px 15px; border: 1px solid #dcdde1; border-radius: 8px; box-sizing: border-box; font-size: 15px; outline: none; background-color: #fcfcfc;"
+        >
+      </div>
+
+      <div>
+        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #34495e; font-size: 14px;">
+          Pages à analyser :
+        </label>
+        <input 
+          type="text" 
+          formControlName="pages"
+          placeholder="ex: 37,38 ou 10-15" 
+          style="width: 100%; padding: 12px 15px; border: 1px solid #dcdde1; border-radius: 8px; box-sizing: border-box; font-size: 15px; outline: none; background-color: #fcfcfc;"
+        >
+        <small style="color: #95a5a6; font-size: 12px; margin-top: 6px; display: block;">
+          Séparez les pages par des virgules (ex: 1,4,5).
+        </small>
+      </div>
+
+      <div>
+        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #34495e; font-size: 14px;">
+          Fichier PDF :
+        </label>
+        <div style="border: 2px dashed #bdc3c7; border-radius: 8px; padding: 20px; text-align: center; background-color: #f8f9fa; transition: background-color 0.3s;">
+          
+          <input 
+            *ngIf="!selectedFile"
+            type="file" 
+            (change)="onFileSelected($event)"
+            accept=".pdf" 
+            style="width: 100%; cursor: pointer; color: #2c3e50; font-size: 14px;"
+          >
+
+          <div *ngIf="selectedFile" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #e8f0fe; border-radius: 6px; border: 1px solid #a0c3ff;">
+            <span style="color: #1a73e8; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; flex-grow: 1; text-align: left;">
+              📄 {{ selectedFile.name }}
+            </span>
+            <button 
+              type="button" 
+              (click)="clearFile()"
+              title="Retirer le fichier"
+              style="background: none; border: none; color: #d32f2f; font-weight: bold; font-size: 18px; cursor: pointer; padding: 0 5px; margin-left: 10px;">
+              ✖
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display: flex; gap: 15px; margin-top: 35px;">
+      
+      <button 
+        type="button" 
+        (click)="onCancel()"
+        style="flex: 1; padding: 12px; background-color: #ecf0f1; color: #34495e; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px;">
+        Vider
+      </button>
+      
+      <button 
+        type="submit" 
+        [disabled]="!selectedFile"
+        [style.opacity]="!selectedFile ? '0.5' : '1'"
+        [style.cursor]="!selectedFile ? 'not-allowed' : 'pointer'"
+        style="flex: 2; padding: 12px; background-color: #3f51b5; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; box-shadow: 0 4px 10px rgba(63, 81, 181, 0.3); transition: all 0.3s ease;">
+        ✨ Analyser le PDF
+      </button>
+
+    </div>
+  </form>
+
+</div>

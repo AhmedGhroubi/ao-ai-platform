@@ -1,0 +1,126 @@
+<div class="editor-container" *ngIf="tenderData" style="max-width: 900px; margin: auto; padding: 20px; padding-bottom: 60px; font-family: sans-serif;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <h2>✏️ Gestion des Profils & Critères : {{ tenderData.reference }}</h2>
+    <button routerLink="/list" style="padding: 8px 15px; cursor: pointer; background-color: #555; color: white; border: none; border-radius: 4px;">
+      ⬅ Retour à la liste
+    </button>
+  </div>
+
+  <div style="background-color: #f0f4f8; padding: 15px; border-radius: 6px; margin-bottom: 25px; border-left: 4px solid #0056b3;">
+    <label style="font-weight: bold; display: block; margin-bottom: 5px;">🌍 Contexte / Mission Globale :</label>
+    <textarea 
+      [(ngModel)]="extractedData.contexte_mission_globale" 
+      rows="3" 
+      style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
+      placeholder="Entrez le contexte général de l'appel d'offres...">
+    </textarea>
+  </div>
+
+  <div *ngFor="let profile of extractedData.profils; let pIndex = index" 
+       style="border: 1px solid #ddd; padding: 20px; margin-bottom: 30px; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    
+    <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end;">
+      <div style="flex: 2;">
+        <label style="font-weight: bold; color: #333; font-size: 13px;">Titre du Poste :</label>
+        <input 
+          [(ngModel)]="profile.titre_du_poste" 
+          style="width: 100%; padding: 10px; font-size: 16px; border: 1px solid #bbb; border-radius: 4px; font-weight: 500;" 
+        />
+      </div>
+      <div style="width: 120px;">
+        <label style="font-weight: bold; color: #333; font-size: 13px;">Quantité :</label>
+        <input 
+          type="number" 
+          [(ngModel)]="profile.quantite_demandee" 
+          style="width: 100%; padding: 10px; font-size: 16px; border: 1px solid #bbb; border-radius: 4px; text-align: center;" 
+        />
+      </div>
+      <button (click)="removeProfile(pIndex)" style="background-color: #dc3545; color: white; border: none; padding: 11px 15px; cursor: pointer; border-radius: 4px;">
+        🗑️ Supprimer le profil
+      </button>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <label style="font-size: 12px; color: #666;">Observations / Remarques IA sur ce poste :</label>
+      <input [(ngModel)]="profile.observations" placeholder="Aucune observation" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" />
+    </div>
+
+    <div style="margin-left: 20px; padding-left: 15px; border-left: 2px dashed #ccc;">
+      <h4 style="margin: 0 0 10px 0; color: #555; font-size: 14px;">📋 Critères d'évaluation requis :</h4>
+      
+      <div *ngFor="let criterion of profile.criteres_evaluation; let cIndex = index" 
+           style="background-color: #fafafa; border: 1px solid #eee; padding: 12px; margin-bottom: 10px; border-radius: 6px; display: flex; flex-direction: column; gap: 8px; position: relative;">
+        
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input 
+            [(ngModel)]="criterion.type_critere" 
+            placeholder="Type de critère" 
+            style="width: 150px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: #555;" 
+            />
+          
+          <input 
+            [(ngModel)]="criterion.libelle_exigence" 
+            placeholder="Libellé de l'exigence (ex: Diplôme Bac+5 en informatique...)" 
+            style="flex-grow: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px;" 
+          />
+          
+          <button (click)="removeCriterion(pIndex, cIndex)" style="background: transparent; border: none; color: #dc3545; cursor: pointer; font-weight: bold; font-size: 16px; padding: 0 5px;">
+            ✖
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 15px; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <label style="font-size: 12px; color: #666; white-space: nowrap;">Points Max :</label>
+            <input 
+              type="number" 
+              step="0.01" 
+              [(ngModel)]="criterion.points_maximum" 
+              style="width: 70px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; text-align: center;" 
+            />
+          </div>
+          <div style="flex-grow: 1; display: flex; align-items: center; gap: 5px;">
+            <label style="font-size: 12px; color: #666; white-space: nowrap;">Règle de calcul :</label>
+            <input 
+              [(ngModel)]="criterion.regle_notation" 
+              placeholder="Ex: 2 pts si >= 5 ans d'expérience, 0 sinon" 
+              style="width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; color: #444;" 
+            />
+          </div>
+        </div>
+
+      </div>
+
+      <button (click)="addCriterion(pIndex)" style="margin-top: 5px; padding: 6px 12px; cursor: pointer; background-color: #fff; border: 1px solid #007bff; color: #007bff; border-radius: 4px; font-size: 13px; font-weight: 500;">
+        ➕ Ajouter une exigence / critère
+      </button>
+    </div>
+
+  </div>
+
+  <button (click)="addProfile()" style="width: 100%; padding: 15px; border: 2px dashed #007bff; background: #f4f9ff; cursor: pointer; font-size: 15px; color: #007bff; font-weight: bold; border-radius: 6px; margin-bottom: 30px;">
+    ➕ Ajouter un nouveau profil de poste
+  </button>
+
+  <div *ngIf="showSuccessMessage" class="success-alert">
+    ✅ Modifications enregistrées en base de données avec succès !
+  </div>
+
+  <button 
+    class="btn-save" 
+    (click)="onValidate()" 
+    [disabled]="isSaving">
+    
+    <span *ngIf="isSaving">⏳ Enregistrement en cours...</span>
+    
+    <span *ngIf="!isSaving">💾 valider toutes les modifications </span>
+    
+  </button>
+
+
+</div>
+
+<div *ngIf="!tenderData" style="text-align: center; margin-top: 100px; font-family: sans-serif; color: #666;">
+  <p style="font-size: 18px;">⏳ Récupération de la structure de l'Appel d'Offres...</p>
+</div>

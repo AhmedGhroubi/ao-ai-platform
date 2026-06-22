@@ -1,0 +1,31 @@
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ao_postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ao_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: ao_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  # Les services backend, worker et frontend seront ajoutés ici au fur et à mesure
+  # avec leurs Dockerfiles respectifs.
+
+volumes:
+  postgres_data:
+  es_data:
