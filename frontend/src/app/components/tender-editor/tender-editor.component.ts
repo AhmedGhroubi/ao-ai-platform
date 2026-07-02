@@ -38,11 +38,10 @@ export class TenderEditorComponent implements OnInit {
         this.tenderData = res;
         
         // On récupère les données brutes
-        let rawData = res.extracted_data;
+        let rawData: any = (res as any).extracted_data ?? res;
 
-        
-        if (rawData && rawData.extracted_data) {
-          rawData = rawData.extracted_data;
+        if (rawData && (rawData as any).extracted_data) {
+          rawData = (rawData as any).extracted_data;
         }
 
         // On assigne enfin les bonnes données à notre variable

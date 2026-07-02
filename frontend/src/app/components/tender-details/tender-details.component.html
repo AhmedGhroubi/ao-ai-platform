@@ -6,7 +6,7 @@
       ⬅ Retour à la liste
     </button>
 
-    <button *ngIf="tender" [routerLink]="['/editor', tender.id]" style="padding: 8px 15px; cursor: pointer; background-color: #2196F3; border: none; border-radius: 4px; font-weight: bold; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <button *ngIf="tender" [routerLink]="['/editor', $any(tender).id]" style="padding: 8px 15px; cursor: pointer; background-color: #2196F3; border: none; border-radius: 4px; font-weight: bold; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
       ✏️ Modifier les données
     </button>
 
@@ -32,7 +32,7 @@
       </p>
     </div>
 
-    <div *ngIf="tender.extracted_data?.contexte_mission_globale" style="background-color: #e8eaf6; padding: 20px; border-radius: 8px; border-left: 5px solid #3f51b5; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <div *ngIf="tender.extracted_data.contexte_mission_globale" style="background-color: #e8eaf6; padding: 20px; border-radius: 8px; border-left: 5px solid #3f51b5; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
       <h3 style="margin-top: 0; color: #3f51b5; font-size: 18px;">🌐 Contexte de la mission</h3>
       <p style="margin: 0; color: #333; line-height: 1.5; font-size: 15px;">
         {{ tender.extracted_data.contexte_mission_globale }}
@@ -41,7 +41,7 @@
 
     <h2 style="border-bottom: 2px solid #eee; padding-bottom: 10px; color: #333;">👥 Profils demandés</h2>
 
-    <div *ngIf="tender.extracted_data?.profils; else noProfiles" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; margin-top: 20px;">
+    <div *ngIf="tender.extracted_data.profils; else noProfiles" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; margin-top: 20px;">
       
       <div *ngFor="let profile of tender.extracted_data.profils" style="background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 20px; transition: transform 0.2s;">
         
@@ -74,6 +74,9 @@
               <div *ngIf="critere.regle_notation" style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ddd; font-style: italic; color: #00796b; font-size: 12px;">
                 📐 <strong>Notation :</strong> {{ critere.regle_notation }}
               </div>
+
+              
+
               
             </li>
           </ul>

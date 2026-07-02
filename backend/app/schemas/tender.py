@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 from typing import Any, Dict, Optional
 
@@ -9,6 +11,7 @@ class TenderBase(BaseModel):
     file_path: Optional[str] = None
     extracted_data: Optional[Dict[str, Any]] = None
     status: Optional[str] = "En attente"
+    created_at: Optional[datetime] = None
 
 # Schéma requis pour la création (ce que le Frontend va envoyer)
 class TenderCreate(TenderBase):

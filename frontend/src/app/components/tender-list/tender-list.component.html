@@ -9,7 +9,8 @@
     <thead>
       <tr style="background-color: #f2f2f2;">
         <th style="padding: 10px; width: 60px;">N°</th>
-        <th style="padding: 10px;">Référence</th>
+        <th style="padding: 10px;">Titre de l'Appel d'Offres</th>
+        <th style="padding: 10px;">Date d'ajout</th>
         <th style="padding: 10px;">Statut</th>
         <th style="padding: 10px;">Actions</th>
       </tr>
@@ -19,14 +20,29 @@
         
         <td style="padding: 10px;">{{ i + 1 }}</td>
         
-        <td style="padding: 10px;">{{ tender.reference }}</td>
+        <td style="padding: 10px;">{{ tender.title || tender.reference }}</td>
         
         <td style="padding: 10px;">
-          <span *ngIf="tender.status === 'Analysé' || tender.extracted_data" style="color: green; font-weight: bold;">✔ Analysé</span>
-          <span *ngIf="tender.status === 'En attente' && !tender.extracted_data" style="color: red;">⏳ En attente</span>
+          {{ tender.created_at | date:'dd/MM/yyyy HH:mm' }}
         </td>
         
+       <td style="padding: 10px;">
+        <span *ngIf="tender.status === 'Analysé' || tender.extracted_data" style="color: green; font-weight: bold;">
+          ✔ Analysé
+        </span>
+        
+        <span *ngIf="tender.status === 'En cours'" style="color: #FF9800; font-weight: bold;" class="loading-status">
+          ⚙️ Analyse IA en cours...
+        </span>
+        
+        <span *ngIf="tender.status === 'En attente' && !tender.extracted_data" style="color: red;">
+          ⏳ En attente
+        </span>
+      </td>
+        
         <td style="padding: 10px;">
+  
+        <ng-container *ngIf="tender.status !== 'En cours'">
           <button [routerLink]="['/details', tender.id]" style="margin-right: 10px; padding: 6px 12px; cursor: pointer; background-color: #9C27B0; color: white; border: none; border-radius: 4px;">
             👁️ Détails
           </button>
@@ -38,11 +54,17 @@
           <button (click)="deleteTender(tender.id)" style="padding: 6px 12px; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 4px;">
             🗑️ Supprimer
           </button>
-        </td>
+        </ng-container>
+
+        <button *ngIf="tender.status === 'En cours'" (click)="cancelAnalysis(tender.id)" style="padding: 6px 12px; cursor: pointer; background-color: #FF9800; color: white; border: none; border-radius: 4px;">
+          🛑 Annuler l'analyse
+        </button>
+
+      </td>
       </tr>
       
       <tr *ngIf="tenders.length === 0">
-        <td colspan="4" style="text-align: center; padding: 20px; font-style: italic; color: #666;">
+        <td colspan="5" style="text-align: center; padding: 20px; font-style: italic; color: #666;">
           Aucun appel d'offres pour le moment.
         </td>
       </tr>

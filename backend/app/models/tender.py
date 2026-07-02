@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text,JSON
+from sqlalchemy import Column, DateTime, Integer, String, Text,JSON, func
 from app.database.session import Base 
 
 class Tender(Base):
@@ -11,3 +11,4 @@ class Tender(Base):
     file_path = Column(String, nullable=True)
     extracted_data = Column(JSON, nullable=True)
     status = Column(String, default="En attente")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
