@@ -1,0 +1,122 @@
+<div class="list-container">
+  <h2>📋 Liste des Experts</h2>
+  
+  <button routerLink="/experts/upload" style="margin-bottom: 15px; padding: 10px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 4px;">
+    + Analyser un nouveau CV
+  </button>
+
+  <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
+    <thead>
+      <tr style="background-color: #f2f2f2;">
+        <th style="padding: 10px; width: 60px;">N°</th>
+        <th style="padding: 10px;">Nom de l'Expert / Fichier</th>
+        <th style="padding: 10px;">Poste Principal</th>
+        <th style="padding: 10px;">Statut</th>
+        <th style="padding: 10px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let expert of experts; let i = index">
+        
+        <td style="padding: 10px;">{{ i + 1 }}</td>
+        
+        <td style="padding: 10px;">
+          <strong>{{ expert.nom_expert || 'Analyse en cours...' }}</strong>
+          <span style="display: block; font-size: 11px; color: #7f8c8d; margin-top: 2px;">
+            📄 {{ expert.filename }}
+          </span>
+        </td>
+        
+        <td style="padding: 10px;">
+          {{ expert.extracted_data?.titre_poste_principal || '—' }}
+        </td>
+        
+        <!-- ── COLONNE STATUT ────────────────────────────────────────────── -->
+        <td style="padding: 10px;">
+          <span *ngIf="expert.status === 'Analysé'" style="color: green; font-weight: bold;">
+            ✔ Analysé
+          </span>
+          
+          <span *ngIf="expert.status === 'En attente' || expert.status === 'En cours d\'analyse'" style="color: #2196f3; font-weight: bold;" class="loading-status">
+            ⚙️ Analyse IA en cours...
+          </span>
+
+          <span *ngIf="expert.status === 'Quota journalier dépassé (En pause)'" style="color: #ff9800; font-weight: bold;">
+            ⚠️ En pause (Quota IA atteint)
+          </span>
+          
+          <span *ngIf="expert.status === 'Erreur'" style="color: red; font-weight: bold;">
+            ❌ Erreur
+          </span>
+        </td>
+
+        <!-- ── COLONNE ACTIONS ────────────────────────────────────────────── -->
+        <td style="vertical-align: middle;">
+  
+          <!-- 📥 INPUT CACHÉ POUR LA MAJ DU CV -->
+          <input 
+            type="file" 
+            #fileInput 
+            style="display: none;" 
+            accept=".docx" 
+            (change)="onFileSelected($event, expert)"
+          >
+
+          <!-- Actions si Analysé -->
+          <ng-container *ngIf="expert.status === 'Analysé'">
+            
+            <button (click)="fileInput.click()" [disabled]="uploadingExpertId === expert.id" style="background-color: #00897b; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <span *ngIf="uploadingExpertId === expert.id">⏳ Envoi...</span>
+              <span *ngIf="uploadingExpertId !== expert.id">🔄 Maj CV</span>
+            </button>
+
+            <button [routerLink]="['/experts/details', expert.id]" style="background-color: #8e24aa; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+              👁️ Détails
+            </button>
+            <button [routerLink]="['/experts/edit', expert.id]" style="background-color: #2196f3; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+              ✏️ Modifier
+            </button>
+            <button (click)="onDelete(expert.id)" style="background-color: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+              🗑️ Supprimer
+            </button>
+          </ng-container>
+
+          <!-- Actions si En cours / En attente -->
+          <ng-container *ngIf="expert.status === 'En attente' || expert.status === 'En cours d\'analyse'">
+            <button (click)="annulerAnalyse(expert.id)" style="background-color: #9e9e9e; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              🛑 Annuler
+            </button>
+          </ng-container>
+
+          <!-- Actions si Quota dépassé (En pause) -->
+          <ng-container *ngIf="expert.status === 'Quota journalier dépassé (En pause)'">
+            <button (click)="reprendreAnalyse(expert.id)" style="background-color: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              🔄 Reprendre
+            </button>
+            <button (click)="onDelete(expert.id)" style="background-color: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+              🗑️ Supprimer
+            </button>
+          </ng-container>
+
+          <!-- Actions si Erreur -->
+          <ng-container *ngIf="expert.status === 'Erreur'">
+            <button (click)="reprendreAnalyse(expert.id)" style="background-color: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            🔄 Reprendre
+          </button>
+            <button (click)="onDelete(expert.id)" style="background-color: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+              🗑️ Supprimer
+            </button>
+          </ng-container>
+
+        </td>
+      </tr>
+      
+      <tr *ngIf="experts.length === 0">
+        <td colspan="5" style="text-align: center; padding: 20px; font-style: italic; color: #666;">
+          Aucun expert pour le moment.
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>

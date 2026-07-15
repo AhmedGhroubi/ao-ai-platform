@@ -3,7 +3,8 @@ from app.database.session import engine
 from app.models.tender import Base
 from app.api.tender import router as tender_router
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.models.expert import Expert
+from app.api.expert import router as expert_router
 # Crée les tables SQL
 Base.metadata.create_all(bind=engine)
 
@@ -30,3 +31,5 @@ def read_root():
         "status": "success",
         "message": "API opérationnelle. Visitez /docs pour tester les endpoints."
     }
+
+app.include_router(expert_router, prefix="/api")

@@ -57,7 +57,6 @@ export class TenderListComponent implements OnInit {
     if (confirmDelete) {
       this.tenderService.deleteTender(id).subscribe({
         next: () => {
-          // Succès ! On met à jour la liste affichée SANS recharger la page
           this.tenders = this.tenders.filter(t => t.id !== id);
         },
         error: (err) => {
