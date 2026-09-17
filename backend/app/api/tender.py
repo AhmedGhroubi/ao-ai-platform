@@ -193,19 +193,23 @@ async def save_verified_data(
     if not tender:
         raise HTTPException(status_code=404, detail="Appel d'offres non trouvé")
 
-    # Si Angular envoie {"extracted_data": {...}}
+    # 1. Sauvegarde de extracted_data
     if data.extracted_data:
         tender.extracted_data = data.extracted_data.model_dump()
-    # Si Angular envoie directement le contenu {...}
     else:
         tender.extracted_data = {
             "contexte_mission_globale": data.contexte_mission_globale,
             "profils": [p.model_dump() for p in (data.profils or [])]
         }
         
+    # 🌍 2. NOUVEAU : Sauvegarde des régions ciblées à la racine
+    if hasattr(data, 'regions_ciblees') and data.regions_ciblees is not None:
+        tender.regions_ciblees = data.regions_ciblees
+        
     tender.status = "Analysé"
     db.commit()
-    return {"message": "Données sauvegardées avec succès !"}
+    
+    return {"message": "Données et régions sauvegardées avec succès !"}
 
 
 @router.delete("/{tender_id}")

@@ -1,92 +1,98 @@
-<div class="upload-container" style="max-width: 550px; margin: 60px auto; padding: 40px 30px; background: #ffffff; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); font-family: 'Segoe UI', Arial, sans-serif; border-top: 5px solid #3f51b5;">
+<div class="upload-wrapper">
   
-  <div style="margin-bottom: 25px;">
-    <button routerLink="/experts" style="padding: 8px 15px; cursor: pointer; background-color: #f1f2f6; border: none; border-radius: 6px; font-weight: bold; color: #57606f; transition: background-color 0.2s;">
-      ⬅ Retour à la liste
-    </button>
-  </div>
-
-  <div style="text-align: center; margin-bottom: 35px;">
-    <div style="font-size: 45px; margin-bottom: 10px;">🧑‍💻</div>
-    <h2 style="color: #2c3e50; margin: 0 0 10px 0; font-size: 24px;">Nouvelle Analyse de CV</h2>
-    <p style="color: #7f8c8d; font-size: 14px; margin: 0;">Uploadez le CV au format Word (.docx) pour extraire les compétences par Intelligence Artificielle.</p>
-  </div>
-
-  <div style="display: flex; flex-direction: column; gap: 25px;">
+  <!-- CARTE FORMULAIRE D'UPLOAD -->
+  <div class="card upload-card">
     
-    <div>
-      <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #34495e; font-size: 14px;">
-        Fichier CV (.docx) :
-      </label>
-      <div style="border: 2px dashed #bdc3c7; border-radius: 8px; padding: 20px; text-align: center; background-color: #f8f9fa; transition: background-color 0.3s;">
+    <!-- BOUTON RETOUR -->
+    <div class="nav-bar">
+      <button routerLink="/experts" class="btn-secondary">
+        ⬅ Retour à la liste
+      </button>
+    </div>
+
+    <!-- EN-TÊTE -->
+    <div class="upload-header">
+      <div class="upload-icon">🧑‍💻</div>
+      <h2>Nouvelle Analyse de CV</h2>
+      <p class="upload-subtitle">Uploadez le CV au format Word (.docx) pour extraire les compétences par Intelligence Artificielle.</p>
+    </div>
+
+    <!-- CORPS DU FORMULAIRE -->
+    <div class="upload-body">
+      
+      <!-- ZONE DE SÉLECTION DU FICHIER -->
+      <div class="form-group">
+        <label class="form-label">Fichier CV (.docx) :</label>
         
-        <input 
-          *ngIf="!selectedFile"
-          type="file" 
-          (change)="onFileSelected($event)"
-          accept=".docx" 
-          style="width: 100%; cursor: pointer; color: #2c3e50; font-size: 14px;"
-        >
+        <div class="dropzone" [class.has-file]="selectedFile">
+          
+          <!-- SELECTION INITIALE -->
+          <input 
+            *ngIf="!selectedFile"
+            type="file" 
+            (change)="onFileSelected($event)"
+            accept=".docx" 
+            class="file-input"
+          >
 
-        <div *ngIf="selectedFile" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #e8f0fe; border-radius: 6px; border: 1px solid #a0c3ff;">
-          <span style="color: #1a73e8; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; flex-grow: 1; text-align: left;">
-            📄 {{ selectedFile.name }}
-          </span>
-          <button 
-            type="button" 
-            (click)="selectedFile = null; currentExpert = null"
-            title="Retirer le fichier"
-            style="background: none; border: none; color: #d32f2f; font-weight: bold; font-size: 18px; cursor: pointer; padding: 0 5px; margin-left: 10px;">
-            ✖
-          </button>
+          <!-- BADGE FICHIER SÉLECTIONNÉ -->
+          <div *ngIf="selectedFile" class="file-chip">
+            <span class="file-name">📄 {{ selectedFile.name }}</span>
+            <button 
+              type="button" 
+              (click)="selectedFile = null; currentExpert = null"
+              title="Retirer le fichier"
+              class="btn-remove-file">
+              ✕
+            </button>
+          </div>
+
         </div>
-
       </div>
+
+      <!-- ALERTE DE STATUT -->
+      <div *ngIf="currentExpert" 
+           class="status-alert"
+           [ngClass]="{
+             'status-success': currentExpert.status === 'Analysé',
+             'status-error': currentExpert.status === 'Erreur',
+             'status-pending': currentExpert.status !== 'Analysé' && currentExpert.status !== 'Erreur'
+           }">
+        <div class="status-content">
+          <strong class="status-title">Statut : {{ currentExpert.status }}</strong>
+          <span *ngIf="currentExpert.status !== 'Analysé' && currentExpert.status !== 'Erreur'" class="status-subtext">
+            Analyse par les 4 agents en cours (5 à 10s)...
+          </span>
+        </div>
+      </div>
+
+      <!-- BOUTONS D'ACTION -->
+      <div class="actions-row">
+        <button 
+          type="button" 
+          (click)="selectedFile = null; currentExpert = null"
+          class="btn-secondary btn-clear">
+          Vider
+        </button>
+        
+        <button 
+          type="button" 
+          (click)="onUpload()"
+          [disabled]="!selectedFile || isUploading"
+          class="btn-primary btn-submit">
+          {{ isUploading ? 'Envoi...' : '✨ Analyser le CV' }}
+        </button>
+      </div>
+
     </div>
 
   </div>
 
-  <div *ngIf="currentExpert" style="margin-top: 25px; padding: 15px; border-radius: 8px; border: 1px solid; display: flex; align-items: center; gap: 15px; font-size: 14px;"
-       [ngStyle]="{
-         'background-color': (currentExpert.status === 'Analysé') ? '#e8f5e9' : (currentExpert.status === 'Erreur' ? '#ffebee' : '#fff8e1'),
-         'border-color': (currentExpert.status === 'Analysé') ? '#c8e6c9' : (currentExpert.status === 'Erreur' ? '#ffcdd2' : '#ffecb3'),
-         'color': (currentExpert.status === 'Analysé') ? '#2e7d32' : (currentExpert.status === 'Erreur' ? '#c62828' : '#f57f17')
-       }">
-    <div>
-      <strong style="display: block; margin-bottom: 4px;">Statut : {{ currentExpert.status }}</strong>
-      <span *ngIf="currentExpert.status !== 'Analysé' && currentExpert.status !== 'Erreur'" style="font-size: 12px; opacity: 0.8;">
-        Analyse par les 4 agents en cours (5 à 10s)...
-      </span>
-    </div>
+  <!-- BLOC DE RÉSULTAT JSON -->
+  <div *ngIf="currentExpert && currentExpert.status === 'Analysé'" class="card results-card">
+    <h3 class="results-title">Résultats de l'analyse</h3>
+    <p class="results-subtitle">Le CV a été analysé avec succès. Voici le détail du résultat :</p>
+    <pre class="json-preview">{{ currentExpert | json }}</pre>
   </div>
 
-  <div style="display: flex; gap: 15px; margin-top: 35px;">
-    
-    <button 
-      type="button" 
-      (click)="selectedFile = null; currentExpert = null"
-      style="flex: 1; padding: 12px; background-color: #ecf0f1; color: #34495e; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px;">
-      Vider
-    </button>
-    
-    <button 
-      type="button" 
-      (click)="onUpload()"
-      [disabled]="!selectedFile || isUploading"
-      [style.opacity]="(!selectedFile || isUploading) ? '0.5' : '1'"
-      [style.cursor]="(!selectedFile || isUploading) ? 'not-allowed' : 'pointer'"
-      style="flex: 2; padding: 12px; background-color: #3f51b5; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; box-shadow: 0 4px 10px rgba(63, 81, 181, 0.3); transition: all 0.3s ease;">
-      {{ isUploading ? 'Envoi...' : '✨ Analyser le CV' }}
-    </button>
-
-  </div>
-
-</div>
-
-<div *ngIf="currentExpert && currentExpert.status === 'Analysé'" style="max-width: 1000px; margin: 0 auto 60px auto; padding: 0 20px;">
-  <div style="background: #ffffff; border-radius: 12px; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.08);">
-    <h3 style="margin: 0 0 15px 0; color: #2c3e50;">Résultats de l'analyse</h3>
-    <p style="margin: 0 0 20px 0; color: #4b5563;">Le CV a été analysé avec succès. Voici le détail du résultat :</p>
-    <pre style="background: #f4f6f9; color: #1f2937; padding: 15px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.5;">{{ currentExpert | json }}</pre>
-  </div>
 </div>

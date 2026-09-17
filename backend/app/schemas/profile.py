@@ -74,3 +74,4 @@ class TenderDataUpdate(BaseModel):
     extracted_data: Optional[ExtractedData] = None
     contexte_mission_globale: Optional[str] = None
     profils: Optional[List[ProfilDemande]] = None
+    regions_ciblees: Optional[List[str]] = None

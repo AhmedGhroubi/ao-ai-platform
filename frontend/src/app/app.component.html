@@ -1,1 +1,9 @@
+<button 
+  class="theme-toggle-btn" 
+  (click)="toggleTheme()" 
+  [attr.aria-label]="themeService.isDarkMode() ? 'Activer le mode clair' : 'Activer le mode sombre'"
+  [title]="themeService.isDarkMode() ? 'Passer au mode clair' : 'Passer au mode sombre'">
+  <span>{{ themeService.isDarkMode() ? '☀️' : '🌙' }}</span>
+</button>
+
 <router-outlet></router-outlet>

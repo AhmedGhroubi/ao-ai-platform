@@ -8,7 +8,8 @@ import { TenderService } from '../../services/tender.service';
   selector: 'app-tender-upload',
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule, RouterModule], 
-  templateUrl: './tender-upload.component.html'
+  templateUrl: './tender-upload.component.html',
+  styleUrls: ['./tender-upload.component.css']
 })
 export class TenderUploadComponent {
   uploadForm: FormGroup;

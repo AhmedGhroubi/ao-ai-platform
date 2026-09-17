@@ -8,13 +8,17 @@ import { TenderService } from '../../services/tender.service';
   selector: 'app-tender-editor',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
-  templateUrl: './tender-editor.component.html'
+  templateUrl: './tender-editor.component.html',
+  styleUrls: ['./tender-editor.component.css']
 })
 export class TenderEditorComponent implements OnInit {
   tenderId!: number;
   tenderData: any = null;
   isSaving: boolean = false;
   showSuccessMessage: boolean = false;
+  
+  // 🟢 Gestion dynamique du périmètre géographique (liste d'inputs)
+  regionsList: string[] = [];
   
   // Initialisation avec la structure exacte reçue de l'IA
   extractedData: any = {
@@ -29,7 +33,9 @@ export class TenderEditorComponent implements OnInit {
 
   ngOnInit(): void {
     this.tenderId = Number(this.route.snapshot.paramMap.get('id'));
-    this.loadTender();
+    if (this.tenderId) {
+      this.loadTender();
+    }
   }
 
   loadTender(): void {
@@ -44,21 +50,63 @@ export class TenderEditorComponent implements OnInit {
           rawData = (rawData as any).extracted_data;
         }
 
-        // On assigne enfin les bonnes données à notre variable
+        // Assignation des données à notre variable
         this.extractedData = rawData || { contexte_mission_globale: "", profils: [] };
         
-        // Sécurité et initialisation du mode lecture
+        // Synchronisation de la liste des régions depuis la base de données
+        this.syncScopeGeographiqueFromData();
+        
+        // Sécurité sur la structure des profils
         if (!this.extractedData.profils) {
           this.extractedData.profils = [];
         } else {
           this.extractedData.profils.forEach((p: any) => p.isEditing = false);
         }
       },
-      error: (err) => console.error('Erreur lors du chargement', err)
+      error: (err) => console.error('Erreur lors du chargement de l’appel d’offres', err)
     });
   }
 
+  // --- GESTION DU PÉRIMÈTRE GÉOGRAPHIQUE ---
+
+  // ⚠️ Important pour *ngFor : évite de perdre le focus pendant la saisie dans un tableau de chaînes
+  trackByIndex(index: number, item: any): number {
+    return index;
+  }
+
+  private syncScopeGeographiqueFromData(): void {
+    // Lecture prioritaire à la racine (regions_ciblees) puis fallback sur extracted_data
+    const values = this.tenderData?.regions_ciblees || this.extractedData?.scope_geographique;
+    
+    if (Array.isArray(values)) {
+      this.regionsList = values
+        .filter((v: any) => v && typeof v === 'string')
+        .map((v: string) => v.trim());
+      return;
+    }
+
+    if (typeof values === 'string' && values.trim()) {
+      // Si d'anciennes données étaient sous forme de chaîne de caractères
+      this.regionsList = values
+        .split(/[,;\n]+/)
+        .map((v: string) => v.trim())
+        .filter(Boolean);
+      return;
+    }
+
+    this.regionsList = [];
+  }
+
+  addRegion(): void {
+    this.regionsList.push('');
+  }
+
+  removeRegion(index: number): void {
+    this.regionsList.splice(index, 1);
+  }
+
   // --- GESTION DES PROFILS ---
+
   addProfile(): void {
     this.extractedData.profils.push({
       titre_du_poste: 'Nouveau Profil',
@@ -73,12 +121,12 @@ export class TenderEditorComponent implements OnInit {
   }
 
   // --- GESTION DES CRITÈRES ---
+
   addCriterion(profileIndex: number): void {
     if (!this.extractedData.profils[profileIndex].criteres_evaluation) {
       this.extractedData.profils[profileIndex].criteres_evaluation = [];
     }
     
-    // Structure d'un nouveau critère selon ton modèle
     this.extractedData.profils[profileIndex].criteres_evaluation.push({
       type_critere: 'experience',
       libelle_exigence: 'Nouvelle exigence...',
@@ -91,46 +139,66 @@ export class TenderEditorComponent implements OnInit {
     this.extractedData.profils[profileIndex].criteres_evaluation.splice(criterionIndex, 1);
   }
 
-  // --- SAUVEGARDE EN BASE ---
-  onSave(): void {
-    this.tenderService.updateTenderData(this.tenderId, this.extractedData).subscribe({
-      next: () => alert('✅ Modifications enregistrées avec succès !'),
-      error: (err) => console.error('Erreur lors de la sauvegarde', err)
-    });
-  }
+  // --- SAUVEGARDE EN BASE DE DONNÉES ---
+
   onValidate(): void {
-    // 1. On lance l'animation de chargement
     this.isSaving = true;
     this.showSuccessMessage = false;
 
-    // 2. On fait une copie propre des données et on enlève la variable d'édition
+    // 1. Copie propre des données
     const cleanedData = JSON.parse(JSON.stringify(this.extractedData));
     if (cleanedData.profils) {
       cleanedData.profils.forEach((p: any) => delete p.isEditing);
     }
+    delete cleanedData.scope_geographique;
 
-    // 🚨 3. LE CORRECTIF : On emballe les données dans "extracted_data"
+    // 2. Nettoyage + SUPPRESSION DES DOUBLONS (insensible à la casse)
+    const seen = new Set<string>();
+    const cleanedRegions: string[] = [];
+
+    for (const r of this.regionsList) {
+      const trimmed = r ? r.trim() : '';
+      if (trimmed) {
+        const lower = trimmed.toLowerCase();
+        // Si le pays n'a pas encore été ajouté, on l'ajoute
+        if (!seen.has(lower)) {
+          seen.add(lower);
+          cleanedRegions.push(trimmed); // On conserve la casse originale (ex: "Ghana")
+        }
+      }
+    }
+
+    // On remet la liste nettoyée dans le composant
+    this.regionsList = [...cleanedRegions];
+
+    // 3. Emballage du payload
     const payload = {
-      extracted_data: cleanedData
+      extracted_data: cleanedData,
+      regions_ciblees: cleanedRegions
     };
 
-    // 4. On envoie le "payload" bien emballé au backend
+    // 4. Envoi via le service Angular
     this.tenderService.updateTenderData(this.tenderId, payload).subscribe({
       next: () => {
-        // Succès ! Le backend a accepté le JSON
         this.isSaving = false;
         this.showSuccessMessage = true;
-        
-        // Fait disparaître le message de succès après 4 secondes
-        setTimeout(() => {
-          this.showSuccessMessage = false;
-        }, 4000);
+        setTimeout(() => this.showSuccessMessage = false, 4000);
       },
       error: (err) => {
         console.error('Erreur lors de la validation', err);
         this.isSaving = false;
-        alert("❌ Une erreur est survenue lors de l'enregistrement. Vérifie la console.");
+        alert("❌ Une erreur est survenue lors de l'enregistrement.");
       }
+    });
+  }
+
+  // Vérifie si la région à un index donné est déjà présente ailleurs dans la liste
+  isDuplicateRegion(index: number): boolean {
+    const currentValue = this.regionsList[index]?.trim().toLowerCase();
+    if (!currentValue) return false;
+
+    return this.regionsList.some((region, i) => {
+      return i !== index && region?.trim().toLowerCase() === currentValue;
     });
   }
 }

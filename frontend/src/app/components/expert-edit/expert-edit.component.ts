@@ -79,6 +79,7 @@ export class ExpertEditComponent implements OnInit {
   get etudes() { return this.editForm.get('extracted_data.etudes') as FormArray; }
   get competences() { return this.editForm.get('extracted_data.competences_techniques') as FormArray; }
   get langues() { return this.editForm.get('extracted_data.langues') as FormArray; }
+  get certifications() { return this.editForm.get('extracted_data.certifications') as FormArray; }
   get projets(): FormArray {
   return (this.editForm.get('extracted_data') as FormGroup).get('projets_et_missions') as FormArray;
 }
@@ -108,12 +109,14 @@ export class ExpertEditComponent implements OnInit {
 
     this.langues.clear();
     this.competences.clear();
+    this.certifications.clear();
     this.etudes.clear();
     this.experiences.clear();
     this.projets.clear();
 
     data.langues?.forEach(l => this.langues.push(this.fb.control(l)));
     data.competences_techniques?.forEach(c => this.competences.push(this.fb.control(c)));
+    data.certifications?.forEach(c => this.certifications.push(this.fb.control(c)));
     
     data.etudes?.forEach(e => {
       this.etudes.push(this.fb.group({
@@ -264,6 +267,13 @@ reanalyzeSection(sectionName: string) {
             nationalite: source.nationalite || '',
             date_naissance: source.date_naissance || ''
           });
+
+          if (source.certifications && Array.isArray(source.certifications)) {
+            this.certifications.clear();
+            source.certifications.forEach((cert: string) => {
+              this.certifications.push(this.fb.control(cert));
+            });
+          }
           
           this.editForm.updateValueAndValidity();
           console.log("✅ Formulaire d'identité mis à jour avec succès !");

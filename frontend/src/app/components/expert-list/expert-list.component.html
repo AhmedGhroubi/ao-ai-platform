@@ -1,122 +1,159 @@
 <div class="list-container">
-  <h2>📋 Liste des Experts</h2>
   
-  <button routerLink="/experts/upload" style="margin-bottom: 15px; padding: 10px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 4px;">
-    + Analyser un nouveau CV
-  </button>
+  <!-- EN-TÊTE ET ACTIONS -->
+  <header class="list-header">
+    <div class="header-text">
+      <span class="welcome-badge">👥 Pool RH & Experts</span>
+      <h1>Liste des Experts</h1>
+      <p class="subtitle">Gérez la banque de talents, mettez à jour les CVs et suivez l'extraction automatique des compétences par l'IA.</p>
+    </div>
+    <div class="header-actions">
+      <!-- BOUTON RETOUR DASHBOARD -->
+      <button class="btn-secondary" routerLink="/dashboard">
+        🏠 Tableau de bord
+      </button>
 
-  <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
-    <thead>
-      <tr style="background-color: #f2f2f2;">
-        <th style="padding: 10px; width: 60px;">N°</th>
-        <th style="padding: 10px;">Nom de l'Expert / Fichier</th>
-        <th style="padding: 10px;">Poste Principal</th>
-        <th style="padding: 10px;">Statut</th>
-        <th style="padding: 10px;">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let expert of experts; let i = index">
-        
-        <td style="padding: 10px;">{{ i + 1 }}</td>
-        
-        <td style="padding: 10px;">
-          <strong>{{ expert.nom_expert || 'Analyse en cours...' }}</strong>
-          <span style="display: block; font-size: 11px; color: #7f8c8d; margin-top: 2px;">
-            📄 {{ expert.filename }}
-          </span>
-        </td>
-        
-        <td style="padding: 10px;">
-          {{ expert.extracted_data?.titre_poste_principal || '—' }}
-        </td>
-        
-        <!-- ── COLONNE STATUT ────────────────────────────────────────────── -->
-        <td style="padding: 10px;">
-          <span *ngIf="expert.status === 'Analysé'" style="color: green; font-weight: bold;">
-            ✔ Analysé
-          </span>
+      <!-- BOUTON NOUVEAU CV -->
+      <button class="btn-primary" routerLink="/experts/upload">
+        ➕ Analyser un nouveau CV
+      </button>
+    </div>
+  </header>
+
+  <!-- CARTE TABLEAU -->
+  <div class="table-card">
+    <table class="expert-table">
+      <thead>
+        <tr>
+          <th class="col-index">N°</th>
+          <th>Expert / Fichier</th>
+          <th>Poste Principal</th>
+          <th>Statut Analyse</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let expert of experts; let i = index">
           
-          <span *ngIf="expert.status === 'En attente' || expert.status === 'En cours d\'analyse'" style="color: #2196f3; font-weight: bold;" class="loading-status">
-            ⚙️ Analyse IA en cours...
-          </span>
-
-          <span *ngIf="expert.status === 'Quota journalier dépassé (En pause)'" style="color: #ff9800; font-weight: bold;">
-            ⚠️ En pause (Quota IA atteint)
-          </span>
+          <!-- INDEX -->
+          <td class="col-index font-bold">{{ i + 1 }}</td>
           
-          <span *ngIf="expert.status === 'Erreur'" style="color: red; font-weight: bold;">
-            ❌ Erreur
-          </span>
-        </td>
-
-        <!-- ── COLONNE ACTIONS ────────────────────────────────────────────── -->
-        <td style="vertical-align: middle;">
-  
-          <!-- 📥 INPUT CACHÉ POUR LA MAJ DU CV -->
-          <input 
-            type="file" 
-            #fileInput 
-            style="display: none;" 
-            accept=".docx" 
-            (change)="onFileSelected($event, expert)"
-          >
-
-          <!-- Actions si Analysé -->
-          <ng-container *ngIf="expert.status === 'Analysé'">
+          <!-- NOM & FICHIER -->
+          <td>
+            <div class="expert-info-cell">
+              <strong>{{ expert.nom_expert || 'Analyse en cours...' }}</strong>
+              <span class="file-subtext">📄 {{ expert.filename }}</span>
+            </div>
+          </td>
+          
+          <!-- POSTE PRINCIPAL -->
+          <td>
+            <span class="job-title-pill">
+              {{ expert.extracted_data?.titre_poste_principal || '—' }}
+            </span>
+          </td>
+          
+          <!-- STATUT -->
+          <td>
+            <span *ngIf="expert.status === 'Analysé'" class="status-badge status-success">
+              ✔ Analysé
+            </span>
             
-            <button (click)="fileInput.click()" [disabled]="uploadingExpertId === expert.id" style="background-color: #00897b; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              <span *ngIf="uploadingExpertId === expert.id">⏳ Envoi...</span>
-              <span *ngIf="uploadingExpertId !== expert.id">🔄 Maj CV</span>
-            </button>
+            <span *ngIf="expert.status === 'En attente' || expert.status === 'En cours d\'analyse'" class="status-badge status-info loading-pulse">
+              ⚙️ Analyse IA en cours...
+            </span>
 
-            <button [routerLink]="['/experts/details', expert.id]" style="background-color: #8e24aa; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
-              👁️ Détails
-            </button>
-            <button [routerLink]="['/experts/edit', expert.id]" style="background-color: #2196f3; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
-              ✏️ Modifier
-            </button>
-            <button (click)="onDelete(expert.id)" style="background-color: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
-              🗑️ Supprimer
-            </button>
-          </ng-container>
+            <span *ngIf="expert.status === 'Quota journalier dépassé (En pause)'" class="status-badge status-warning">
+              ⚠️ Pause (Quota IA)
+            </span>
+            
+            <span *ngIf="expert.status === 'Erreur'" class="status-badge status-danger">
+              ❌ Erreur
+            </span>
+          </td>
 
-          <!-- Actions si En cours / En attente -->
-          <ng-container *ngIf="expert.status === 'En attente' || expert.status === 'En cours d\'analyse'">
-            <button (click)="annulerAnalyse(expert.id)" style="background-color: #9e9e9e; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              🛑 Annuler
-            </button>
-          </ng-container>
+          <!-- ACTIONS -->
+          <td class="text-end">
+            
+            <!-- INPUT CACHÉ POUR MAJ CV -->
+            <input 
+              type="file" 
+              #fileInput 
+              style="display: none;" 
+              accept=".docx" 
+              (change)="onFileSelected($event, expert)"
+            >
 
-          <!-- Actions si Quota dépassé (En pause) -->
-          <ng-container *ngIf="expert.status === 'Quota journalier dépassé (En pause)'">
-            <button (click)="reprendreAnalyse(expert.id)" style="background-color: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              🔄 Reprendre
-            </button>
-            <button (click)="onDelete(expert.id)" style="background-color: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
-              🗑️ Supprimer
-            </button>
-          </ng-container>
+            <!-- ACTIONS SI ANALYSÉ -->
+            <div class="action-buttons-group" *ngIf="expert.status === 'Analysé'">
+              
+              <button 
+                (click)="fileInput.click()" 
+                [disabled]="uploadingExpertId === expert.id"
+                class="btn-action btn-update-cv"
+                title="Mettre à jour le fichier CV (.docx)">
+                <span *ngIf="uploadingExpertId === expert.id">⏳ Envoi...</span>
+                <span *ngIf="uploadingExpertId !== expert.id">🔄 Maj CV</span>
+              </button>
 
-          <!-- Actions si Erreur -->
-          <ng-container *ngIf="expert.status === 'Erreur'">
-            <button (click)="reprendreAnalyse(expert.id)" style="background-color: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            🔄 Reprendre
-          </button>
-            <button (click)="onDelete(expert.id)" style="background-color: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
-              🗑️ Supprimer
-            </button>
-          </ng-container>
+              <button 
+                [routerLink]="['/experts/details', expert.id]" 
+                class="btn-action btn-details"
+                title="Consulter le profil extrait">
+                👁️ Voir
+              </button>
 
-        </td>
-      </tr>
-      
-      <tr *ngIf="experts.length === 0">
-        <td colspan="5" style="text-align: center; padding: 20px; font-style: italic; color: #666;">
-          Aucun expert pour le moment.
-        </td>
-      </tr>
+              <button 
+                [routerLink]="['/experts/edit', expert.id]" 
+                class="btn-action btn-edit"
+                title="Éditer les informations">
+                ✏️ Éditer
+              </button>
 
-    </tbody>
-  </table>
+              <button 
+                (click)="onDelete(expert.id)" 
+                class="btn-action btn-delete"
+                title="Supprimer l'expert">
+                🗑️
+              </button>
+
+            </div>
+
+            <!-- ACTIONS SI EN COURS / EN ATTENTE -->
+            <div class="action-buttons-group" *ngIf="expert.status === 'En attente' || expert.status === 'En cours d\'analyse'">
+              <button 
+                (click)="annulerAnalyse(expert.id)" 
+                class="btn-action btn-cancel">
+                🛑 Annuler
+              </button>
+            </div>
+
+            <!-- ACTIONS SI QUOTA DEPASSÉ OU ERREUR -->
+            <div class="action-buttons-group" *ngIf="expert.status === 'Quota journalier dépassé (En pause)' || expert.status === 'Erreur'">
+              <button 
+                (click)="reprendreAnalyse(expert.id)" 
+                class="btn-action btn-resume">
+                🔄 Reprendre
+              </button>
+              
+              <button 
+                (click)="onDelete(expert.id)" 
+                class="btn-action btn-delete">
+                🗑️ Supprimer
+              </button>
+            </div>
+
+          </td>
+        </tr>
+        
+        <!-- MESSAGE SI AUCUNE DONNÉE -->
+        <tr *ngIf="experts.length === 0">
+          <td colspan="5" class="empty-table-msg">
+            📂 Aucun expert enregistré pour le moment. Cliquez sur <strong>"Analyser un nouveau CV"</strong> pour enrichir votre pool.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
 </div>

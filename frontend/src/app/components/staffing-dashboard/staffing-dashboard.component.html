@@ -1,0 +1,217 @@
+<div class="staffing-container">
+  
+  <!-- BOUTON RETOUR -->
+  <button class="btn-back" type="button" (click)="goBackToTenders()">
+    ← Retour à la liste des appels d’offres
+  </button>
+
+  <!-- EN-TÊTE DE LA PAGE -->
+  <section class="card header-card">
+    <div class="header-main">
+      <span class="badge-studio">✨ AI Staffing Studio</span>
+      <h1>Optimisation & Staffing de l'Équipe</h1>
+      <p class="subtitle">Orchestration mathématique et justification par Intelligence Artificielle.</p>
+    </div>
+
+    <!-- ACTIONS DE L'EN-TÊTE (si une équipe existe) -->
+    <div class="header-actions" *ngIf="staffingData && !loading">
+      <div class="summary-pills">
+        <div class="metric-pill">
+          <span class="metric-label">Postes</span>
+          <strong class="metric-value">{{ staffingData.proposition_equipe.length }}</strong>
+        </div>
+        <div class="metric-pill">
+          <span class="metric-label">Arbitrages</span>
+          <strong class="metric-value">{{ staffingData.conflits_arbitres.length }}</strong>
+        </div>
+      </div>
+
+      <!-- 📥 BOUTONS D'EXPORTATION -->
+      <div class="export-group">
+        <button 
+          class="btn-export csv" 
+          type="button"
+          (click)="exportCsv()" 
+          title="Exporter l'équipe sous format CSV / Excel">
+          📥 Export CSV
+        </button>
+        <button 
+          class="btn-export pdf" 
+          type="button"
+          (click)="exportPdf()" 
+          title="Imprimer la fiche d'équipe ou la sauvegarder en PDF">
+          🖨️ PDF
+        </button>
+      </div>
+
+      <button
+        class="btn-recalculate"
+        [ngClass]="{ 'btn-resume': isPaused || isRateLimited }"
+        (click)="onTriggerOptimization(true)"
+        [title]="(isPaused || isRateLimited) ? 'Reprendre l\'analyse là où elle s\'est arrêtée' : 'Relancer l\'optimisation'">
+        {{ (isPaused || isRateLimited) ? '▶ Reprendre' : '↻ Régénérer' }}
+      </button>
+    </div>
+  </section>
+
+  <!-- BANNIÈRE DE CHARGEMENT -->
+  <div *ngIf="loading" class="banner loading-banner">
+    <div class="spinner"></div>
+    <span>Analyse des profils et calcul de l'équipe optimale en cours...</span>
+  </div>
+
+  <!-- BANNIÈRE DE PAUSE / ERREUR -->
+  <div *ngIf="errorMessage && !loading" 
+       class="banner"
+       [ngClass]="(isPaused || isRateLimited) ? 'pause-banner' : 'error-banner'">
+    <div class="banner-content">
+      <span *ngIf="isPaused || isRateLimited">⏸️ <strong>Traitement en pause :</strong> {{ errorMessage }}</span>
+      <span *ngIf="!isPaused && !isRateLimited">⚠️ {{ errorMessage }}</span>
+    </div>
+  </div>
+
+  <!-- ÉTAT VIDE : Aucune équipe générée encore -->
+  <div *ngIf="!staffingData && !loading && !errorMessage" class="card empty-state-card">
+    <div class="empty-state-content">
+      <div class="empty-icon">👥</div>
+      <h3>Aucune équipe n’a encore été générée</h3>
+      <p>Lancez l'algorithme d'optimisation pour composer automatiquement l'équipe d'experts idéale pour cet appel d'offres.</p>
+      
+      <button 
+        class="btn-primary btn-lg" 
+        (click)="onTriggerOptimization(true)">
+        ⚡ Générer une équipe
+      </button>
+    </div>
+  </div>
+
+  <!-- RÉSULTATS DE L'ÉQUIPE -->
+  <div *ngIf="staffingData && !loading" class="results-layout">
+    
+    <!-- KPI SCORE GLOBAL -->
+    <section class="card kpi-card">
+      <div class="kpi-content">
+        <div class="kpi-header">
+          <span class="kpi-label">Score Global d'Adéquation Équipe</span>
+          <div class="kpi-value" [ngClass]="{
+            'score-excellent': staffingData.score_global_equipe >= 80,
+            'score-warning': staffingData.score_global_equipe < 80 && staffingData.score_global_equipe >= 60,
+            'score-danger': staffingData.score_global_equipe < 60
+          }">
+            {{ staffingData.score_global_equipe }}<span class="percent">%</span>
+          </div>
+        </div>
+        <p class="kpi-desc">Prend en compte l’adéquation technique, les critères géographiques, la synergie historique de projet et les contraintes de langues.</p>
+      </div>
+    </section>
+
+    <!-- ARBITRAGES SOLVER -->
+    <div *ngIf="staffingData.conflits_arbitres && staffingData.conflits_arbitres.length > 0" class="card conflict-card">
+      <h4 class="conflict-title">🛡️ Arbitrages effectués par le Solver</h4>
+      <div class="conflict-list">
+        <div *ngFor="let conflit of staffingData.conflits_arbitres" class="conflict-item">
+          <strong>{{ conflit.nom_expert }}</strong> aurait eu un meilleur score sur le poste <u>{{ $any(conflit).best_individual_role || 'Poste optimal' }}</u>,
+          mais a été réaffecté sur le poste <u>{{ $any(conflit).poste }}</u> pour maximiser l’efficience globale de la combinaison d’équipe.
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTE DES POSTES (SLOTS) -->
+    <section class="slots-section">
+      <div class="section-heading">
+        <h3>Composition des Postes Requis</h3>
+        <span class="section-subtitle">Sélection IA, justification sémantique et alternatives en un seul endroit.</span>
+      </div>
+
+      <div *ngFor="let slot of staffingData.proposition_equipe" 
+           class="card slot-card" 
+           [ngClass]="{ 'slot-card-conflict': isSlotInConflict(slot) }">
+        
+        <!-- ALERTE CONFLIT D'AFFECTATION -->
+        <div *ngIf="isSlotInConflict(slot)" class="conflict-alert">
+          <div class="conflict-alert-body">
+            <strong>⚠️ Conflit d’affectation</strong>
+            <p>L’expert <strong>{{ conflictWarning?.expertName }}</strong> est déjà assigné à un autre poste. Vous pouvez remplacer l’affectation actuelle.</p>
+          </div>
+          <div class="conflict-actions">
+            <button class="btn-primary text-sm" type="button" (click)="confirmConflictReplacement()">Remplacer</button>
+            <button class="btn-secondary text-sm" type="button" (click)="clearConflictWarning()">Fermer</button>
+          </div>
+        </div>
+
+        <!-- HEADER DU SLOT -->
+        <div class="slot-header">
+          <div class="slot-title-group">
+            <span class="badge-poste">Poste</span>
+            <h4>{{ slot.poste }}</h4>
+          </div>
+          <div class="expert-score-badge" [ngClass]="{
+            'score-excellent': (slot.expert_selectionne?.score_global ?? 0) >= 80,
+            'score-warning': (slot.expert_selectionne?.score_global ?? 0) < 80 && (slot.expert_selectionne?.score_global ?? 0) >= 60,
+            'score-danger': (slot.expert_selectionne?.score_global ?? 0) < 60
+          }">
+            Match {{ slot.expert_selectionne?.score_global || 0 }}%
+          </div>
+        </div>
+
+        <!-- LIGNE EXPERT SÉLECTIONNÉ -->
+        <div class="assigned-expert-row" *ngIf="slot.expert_selectionne">
+          <div class="avatar-placeholder">👤</div>
+          <div class="expert-info">
+            <span class="expert-name">{{ slot.expert_selectionne.nom_expert }}</span>
+            <span class="expert-role">Expert sélectionné</span>
+          </div>
+
+          <div class="actions-group">
+            <button class="btn-secondary text-sm" (click)="toggleJustificationDrawer(slot.expert_selectionne.expert_id)">
+              💡 Pourquoi lui ?
+            </button>
+            <button class="btn-outline text-sm" (click)="toggleAlternatives(slot)">
+              🔄 Remplacer
+            </button>
+          </div>
+        </div>
+
+        <!-- DRAWER JUSTIFICATION SÉMANTIQUE -->
+        <div *ngIf="activeJustificationSlotId === slot.expert_selectionne?.expert_id" class="drawer-justification">
+          <h5 class="drawer-title">Analyse d’adéquation sémantique (IA)</h5>
+          <p class="summary-text"><em>“ {{ slot.expert_selectionne.justification_ia?.resume }} ”</em></p>
+
+          <div class="bullet-grid">
+            <div class="bullet-col positive">
+              <h6>Points Forts</h6>
+              <ul>
+                <li *ngFor="let pt of slot.expert_selectionne.justification_ia?.points_forts">{{ pt }}</li>
+              </ul>
+            </div>
+            <div class="bullet-col negative" *ngIf="slot.expert_selectionne.justification_ia?.points_faibles?.length">
+              <h6>Points de Vigilance</h6>
+              <ul>
+                <li *ngFor="let pf of slot.expert_selectionne.justification_ia?.points_faibles">{{ pf }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- DROPDOWN ALTERNATIVES -->
+        <div *ngIf="slot.showAlternatives" class="dropdown-alternatives">
+          <h5 class="alt-title">Candidats Alternatifs Pertinents</h5>
+          <div class="alternative-list">
+            <div *ngFor="let alt of slot.alternatives" class="alternative-item">
+              <span class="alt-name">{{ alt.nom_expert }}</span>
+              <span class="alt-score">Match : {{ alt.score_global }}%</span>
+              <button class="btn-select-alt" (click)="onSelectAlternative(slot, alt)">
+                Choisir
+              </button>
+            </div>
+            <div *ngIf="!slot.alternatives || slot.alternatives.length === 0" class="empty-state-text">
+              Aucun autre candidat éligible trouvé pour ce profil.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</div>

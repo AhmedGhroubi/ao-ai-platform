@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from pydantic import BaseModel
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional,List
 
 # Schéma de base contenant les attributs communs
 class TenderBase(BaseModel):
@@ -20,6 +20,7 @@ class TenderCreate(TenderBase):
 # Schéma utilisé pour renvoyer la donnée (ce que l'API va répondre)
 class TenderResponse(TenderBase):
     id: int
+    regions_ciblees: Optional[List[str]] = None
 
     # Indique à Pydantic de lire les données même si ce sont des modèles ORM (SQLAlchemy)
     class Config:

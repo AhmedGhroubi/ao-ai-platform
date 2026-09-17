@@ -1,1 +1,216 @@
-/* You can add global styles to this file, and also import other style files */
+/* ==========================================================================
+   SYSTEME DE THÈME GLOBAL (LIGHT / DARK MODE)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. BOUTON FLOTTANT GLOBAL DE THÈME
+   -------------------------------------------------------------------------- */
+.theme-toggle-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #0f172a;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.1);
+}
+
+body.dark-theme .theme-toggle-btn {
+  background-color: #1e293b;
+  border-color: #475569;
+  color: #f8fafc;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   2. ARRIÈRE-PLAN GLOBAL
+   -------------------------------------------------------------------------- */
+body.dark-theme {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. CARTES, CONTENEURS ET BLOCS D'INFORMATIONS INTERNES
+   -------------------------------------------------------------------------- */
+/* Cartes principales, en-têtes et formulaires */
+body.dark-theme .card,
+body.dark-theme div[class*="card"],
+body.dark-theme header,
+body.dark-theme section,
+body.dark-theme form {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Blocs internes clairs (Poste principal, Expérience, Formations, etc.) */
+body.dark-theme .bg-light,
+body.dark-theme .bg-white,
+body.dark-theme [class*="info"],
+body.dark-theme [class*="detail"],
+body.dark-theme [class*="content-block"],
+body.dark-theme [class*="section-body"],
+body.dark-theme div[style*="background"] {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+/* Encadrés spécifiques (Bloc Slug, alertes, etc.) */
+body.dark-theme div[class*="slug"] {
+  background-color: #0f172a !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. TYPOGRAPHIE ET CONTRASTE DES TEXTES
+   -------------------------------------------------------------------------- */
+/* Titres et textes principaux */
+body.dark-theme h1,
+body.dark-theme h2,
+body.dark-theme h3,
+body.dark-theme h4,
+body.dark-theme h5,
+body.dark-theme h6,
+body.dark-theme p,
+body.dark-theme strong,
+body.dark-theme .expert-name,
+body.dark-theme .metric-value,
+body.dark-theme .alt-name {
+  color: #f8fafc !important;
+}
+
+/* Libellés de formulaire et sous-titres (POSTE PRINCIPAL, EXPÉRIENCE, etc.) */
+body.dark-theme label,
+body.dark-theme .form-label,
+body.dark-theme .label,
+body.dark-theme [class*="label"],
+body.dark-theme small,
+body.dark-theme .text-muted,
+body.dark-theme .subtitle,
+body.dark-theme .section-subtitle,
+body.dark-theme .kpi-desc,
+body.dark-theme .metric-label,
+body.dark-theme .expert-role,
+body.dark-theme span[style*="uppercase"] {
+  color: #94a3b8 !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. CHAMPS DE SAISIE ET FORMULAIRES (INPUTS, SELECTS, TEXTAREAS)
+   -------------------------------------------------------------------------- */
+body.dark-theme input,
+body.dark-theme select,
+body.dark-theme textarea,
+body.dark-theme .form-control {
+  background-color: #0f172a !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme input::placeholder,
+body.dark-theme textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. BADGES, TAGS & PILULES (COMPÉTENCES, STATUTS, FICHIERS)
+   -------------------------------------------------------------------------- */
+/* Tags de compétences (Java, SIG, Scrum, etc.) */
+body.dark-theme .badge,
+body.dark-theme .tag,
+body.dark-theme .chip,
+body.dark-theme [class*="badge"]:not(.badge-success):not(.badge-poste),
+body.dark-theme [class*="tag"],
+body.dark-theme [class*="skill"],
+body.dark-theme [class*="pill"] {
+  background-color: #0f172a !important;
+  color: #38bdf8 !important;
+  border: 1px solid #0284c7 !important;
+}
+
+/* Badges de statut (ex: ✓ Analysé par l'IA) */
+body.dark-theme [class*="status"],
+body.dark-theme [class*="statut"],
+body.dark-theme .badge-success {
+  background-color: #064e3b !important;
+  color: #6ee7b7 !important;
+  border: 1px solid #047857 !important;
+}
+
+/* Badges de document / fichier source (.docx) */
+body.dark-theme [class*="doc"],
+body.dark-theme [class*="file"] {
+  background-color: #334155 !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #475569 !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. BOUTONS & ACTIONS
+   -------------------------------------------------------------------------- */
+/* Boutons secondaires & d'annulation */
+body.dark-theme button:not(.btn-primary):not(.btn-success):not(.theme-toggle-btn),
+body.dark-theme .btn-light,
+body.dark-theme .btn-secondary,
+body.dark-theme .btn-outline,
+body.dark-theme .btn-outline-secondary,
+body.dark-theme .btn-back {
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme button:not(.btn-primary):not(.btn-success):not(.theme-toggle-btn):hover,
+body.dark-theme .btn-light:hover,
+body.dark-theme .btn-secondary:hover,
+body.dark-theme .btn-outline:hover,
+body.dark-theme .btn-back:hover {
+  background-color: #475569 !important;
+}
+
+/* --------------------------------------------------------------------------
+   8. COMPOSANTS SPÉCIFIQUES DASHBOARD (METRICS, DRAWERS & DROPDOWNS)
+   -------------------------------------------------------------------------- */
+body.dark-theme .metric-pill,
+body.dark-theme .assigned-expert-row,
+body.dark-theme .alternative-item,
+body.dark-theme .expert-score-badge {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+body.dark-theme .drawer-justification {
+  background-color: #1a103c !important;
+  border-color: #581c87 !important;
+}
+
+body.dark-theme .summary-text {
+  color: #e9d5ff !important;
+}
+
+body.dark-theme .bullet-col ul {
+  color: #cbd5e1 !important;
+}
+
+body.dark-theme .dropdown-alternatives {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}

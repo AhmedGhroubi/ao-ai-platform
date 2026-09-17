@@ -63,11 +63,22 @@ def call_llm(prompt: str, max_tokens: int = 2048) -> dict:
     Appel LLM avec mode JSON natif et retry automatique sur rate limit d'une minute (3 tentatives).
     Lève une exception si le quota journalier (Daily Limit) est atteint après ces tentatives.
     """
+    # 🛡️ Consigne système stricte imposée à Groq pour valider le mode json_object
+    system_instruction = (
+        "You are a strict data extraction AI. You must respond with a single, valid JSON object. "
+        "Never include markdown blocks like ```json or ```. "
+        "Crucial: If the text contains double quotes, you MUST escape them with a backslash (\\\") "
+        "inside the JSON string values to prevent syntax corruption."
+    )
+
     for attempt in range(1, 4):
         try:
             response = client.chat.completions.create(
                 model=TEXT_MODEL,
-                messages=[{"role": "user", "content": prompt}],
+                messages=[
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": prompt}
+                ],
                 temperature=0.1,
                 max_tokens=max_tokens,
                 response_format={"type": "json_object"},
@@ -79,7 +90,7 @@ def call_llm(prompt: str, max_tokens: int = 2048) -> dict:
             # On détecte les Rate Limits à court terme
             if "rate_limit" in err or "429" in err or "413" in err:
                 wait = 10 * attempt   # 10s, 20s, 30s
-                print(f"  [Rate limit] Tentative {attempt}/3 — attente {wait}s")
+                print(f"   [Rate limit] Tentative {attempt}/3 — attente {wait}s")
                 time.sleep(wait)
                 if attempt == 3:
                     raise e
@@ -152,7 +163,10 @@ EXTRAIT DU CV :
 {profile_text}
 ---
 
-Renvoie UNIQUEMENT un objet JSON respectant STRICTEMENT cette structure :
+CRITIQUE POUR L'API : Tu DOIS répondre exclusivement sous la forme d'un objet JSON valide.
+Ne rajoute aucun texte explicatif ou d'introduction, et n'enveloppe JAMAIS le JSON dans des balises Markdown (interdiction absolue d'utiliser ```json ou ```).
+
+Structure attendue (respecte STRICTEMENT ces clés) :
 {{
     "nom_expert": "NOM Prénom (Écrire le nom de famille en MAJUSCULES)",
     "date_naissance": "JJ/MM/AAAA ou null",
@@ -165,7 +179,7 @@ Renvoie UNIQUEMENT un objet JSON respectant STRICTEMENT cette structure :
     "pays_listes_explicitement": ["Pays mentionnés"]
 }}
 """
-    return call_llm(prompt)
+    return call_llm(prompt,max_tokens=4096)
 
 
 def agent_2_experiences(profile_text: str) -> dict:
@@ -213,12 +227,15 @@ MORCEAU CV :
 {cv_chunk}
 ---
 
-Renvoie UNIQUEMENT un JSON strict :
+CRITIQUE : Tu DOIS répondre exclusivement sous la forme d'un objet JSON valide.
+Ne rajoute aucun texte avant ou après, et n'enveloppe JAMAIS le JSON dans des balises Markdown (interdiction d'utiliser ```json ou ```).
+
+Voici le schéma exact du JSON que tu dois remplir :
 {{
-    "competences_techniques": ["Java", "SIG", "Scrum", "PostgreSQL", "Oracle"]
+    "competences_techniques": ["NomCompétence1", "NomCompétence2"]
 }}
 """
-    return call_llm(prompt)
+    return call_llm(prompt, max_tokens=4096)
 
 
 def agent_4_projets_missions(projects_chunk: str) -> dict:

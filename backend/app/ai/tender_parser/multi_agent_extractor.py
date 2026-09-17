@@ -4,21 +4,32 @@ import base64
 import uuid
 import time
 import shutil
-import re
-import fitz  # PyMuPDF
+import fitz  
 from groq import Groq
+from openai import OpenAI
+import google.generativeai as genai
 from dotenv import load_dotenv
 from app.models.tender import Tender
 from app.database.session import SessionLocal
-from app.schemas import tender
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+# ── Clients API ───────────────────────────────────────────────────────────────
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+# Client OpenAI pour Qwen2.5-VL (compatible OpenRouter, DashScope, VLLM ou autre provider)
+qwen_client = OpenAI(
+    api_key=os.getenv("QWEN_API_KEY"),
+    base_url=os.getenv("QWEN_BASE_URL", "https://openrouter.ai/api/v1")
+)
+
+# Configuration de Gemini
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # ── Modèles ───────────────────────────────────────────────────────────────────
-TEXT_MODEL   = "llama-3.3-70b-versatile"         
-VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"  
+TEXT_MODEL         = "openai/gpt-oss-120b"         
+QWEN_VISION_MODEL  = "qwen/qwen-2.5-vl-72b-instruct"  # Ajuster selon l'identifiant exact chez votre fournisseur
+GEMINI_VISION_MODEL= "gemini-1.5-flash-latest"
 
 MAX_IMAGES_PER_CALL = 4  
 MAX_TEXT_CHARS      = 50000 
@@ -73,8 +84,8 @@ def pdf_to_text_by_page(
     for i in range(start_idx, min(end_idx, len(doc))):
         text = doc[i].get_text("text").strip()
         pages_text.append({
-            "page_num":  i - start_idx + 1,   # numéro relatif (1-based) dans la plage
-            "page_real": i + 1,                # numéro réel dans le PDF
+            "page_num":  i - start_idx + 1,   
+            "page_real": i + 1,                
             "text":      text,
         })
 
@@ -95,7 +106,7 @@ def _safe_image_subset(image_paths: list[str]) -> list[str]:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# APPELS API : TEXTE (Agent 1) et VISION (Agents 2 & 3)
+# APPELS API : TEXTE (Agent 1) et VISION avec FALLBACK (Agents 2 & 3)
 # ──────────────────────────────────────────────────────────────────────────────
 
 def call_text_agent(
@@ -109,7 +120,7 @@ def call_text_agent(
     """
     for attempt in range(1, max_retries + 1):
         try:
-            completion = client.chat.completions.create(
+            completion = groq_client.chat.completions.create(
                 model=TEXT_MODEL,
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -139,16 +150,15 @@ def call_text_agent(
                 raise
 
 
-def call_vision_agent(
+def _call_qwen_vision(
     system_prompt: str,
     user_prompt: str,
     image_paths: list[str],
     max_retries: int = 3,
 ) -> dict:
-    """Appel Vision avec retry, backoff rate-limit et récupération json_validate_failed."""
-    safe_paths   = _safe_image_subset(image_paths)
+    """Appel principal vers Qwen2.5-VL (32B)."""
     content_list = [{"type": "text", "text": f"{system_prompt}\n\n{user_prompt}"}]
-    for path in safe_paths:
+    for path in image_paths:
         content_list.append({
             "type": "image_url",
             "image_url": {"url": f"data:image/png;base64,{encode_image(path)}"},
@@ -156,8 +166,8 @@ def call_vision_agent(
 
     for attempt in range(1, max_retries + 1):
         try:
-            completion = client.chat.completions.create(
-                model=VISION_MODEL,
+            completion = qwen_client.chat.completions.create(
+                model=QWEN_VISION_MODEL,
                 messages=[{"role": "user", "content": content_list}],
                 response_format={"type": "json_object"},
                 temperature=0.0,
@@ -166,45 +176,98 @@ def call_vision_agent(
             return json.loads(completion.choices[0].message.content)
 
         except json.JSONDecodeError as e:
-            print(f"  [Vision Retry {attempt}/{max_retries}] JSON invalide : {e}")
+            print(f"  [Qwen Retry {attempt}/{max_retries}] JSON invalide : {e}")
             if attempt == max_retries:
-                raise ValueError(f"JSON invalide après {max_retries} tentatives")
+                raise
             time.sleep(3)
 
         except Exception as e:
             err_str = str(e).lower()
             if "rate_limit" in err_str or "429" in err_str or "too many" in err_str:
-                # Vérifier si c'est un épuisement journalier (TPD)
-                if "tokens per day" in err_str or "per day" in err_str:
-                    raise   # inutile de retry — limite journalière atteinte
                 wait = 5 * attempt
-                print(f"  [Rate limit vision] Attente {wait}s...")
+                print(f"  [Qwen Rate limit] Attente {wait}s...")
                 time.sleep(wait)
                 if attempt == max_retries:
                     raise
-            elif "json_validate_failed" in err_str or "failed to generate json" in err_str:
-                print(f"  [Vision Retry {attempt}/{max_retries}] json_validate_failed — récupération")
-                try:
-                    match = re.search(r"'failed_generation':\s*'(.*?)'(?:\s*\}|\s*$)", str(e), re.DOTALL)
-                    if match:
-                        raw_failed = match.group(1)
-                        def _eval_expr(m):
-                            try:
-                                return str(round(eval(m.group(0)), 6))
-                            except Exception:
-                                return m.group(0)
-                        fixed  = re.sub(r'[\d.]+(?:\s*\+\s*[\d.]+)+', _eval_expr, raw_failed)
-                        fixed  = fixed.replace("\\n", "\n")
-                        result = json.loads(fixed)
-                        print(f"  [Recovery] JSON récupéré ✅")
-                        return result
-                except Exception as rec_err:
-                    print(f"  [Recovery] Échec : {rec_err}")
-                if attempt == max_retries:
-                    raise ValueError("json_validate_failed non récupérable")
-                time.sleep(3)
             else:
                 raise
+
+
+def _call_gemini_vision(
+    system_prompt: str,
+    user_prompt: str,
+    image_paths: list[str],
+    max_retries: int = 3,
+) -> dict:
+    """Appel de secours (fallback) vers Gemini 2.0 Flash."""
+    contents = [f"{system_prompt}\n\n{user_prompt}"]
+    for path in image_paths:
+        with open(path, "rb") as f:
+            contents.append({
+                "mime_type": "image/png",
+                "data": f.read()
+            })
+
+    model = genai.GenerativeModel(
+        model_name=GEMINI_VISION_MODEL,
+        generation_config={
+            "response_mime_type": "application/json",
+            "temperature": 0.0
+        }
+    )
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = model.generate_content(contents)
+            return json.loads(response.text)
+
+        except json.JSONDecodeError as e:
+            print(f"  [Gemini Retry {attempt}/{max_retries}] JSON invalide : {e}")
+            if attempt == max_retries:
+                raise
+            time.sleep(3)
+
+        except Exception as e:
+            err_str = str(e).lower()
+            if "resource_exhausted" in err_str or "429" in err_str:
+                wait = 5 * attempt
+                print(f"  [Gemini Rate limit] Attente {wait}s...")
+                time.sleep(wait)
+                if attempt == max_retries:
+                    raise
+            else:
+                raise
+
+
+def call_vision_agent(
+    system_prompt: str,
+    user_prompt: str,
+    image_paths: list[str],
+    max_retries: int = 3,
+) -> dict:
+    """
+    Appel Vision orchestré :
+    1. Tente Qwen2.5-VL (72B)
+    2. En cas d'échec ou d'erreur API / Rate limit persistent, bascule automatiquement sur Gemini 1.5 Flash.
+    """
+    safe_paths = _safe_image_subset(image_paths)
+
+    # 1. Tentative Qwen2.5-VL (72B)
+    try:
+        print("  [Vision] Execution avec Qwen2.5-VL (72B)...")
+        return _call_qwen_vision(system_prompt, user_prompt, safe_paths, max_retries=max_retries)
+    except Exception as e:
+        print(f"  ⚠️ [Vision Fallback Triggered] Échec de Qwen2.5-VL (72B) : {e}")
+        print("  🔄 [Vision Fallback] Basculement immédiat sur Gemini 1.5 Flash...")
+
+    # 2. Secours avec Gemini 1.5 Flash
+    try:
+        result = _call_gemini_vision(system_prompt, user_prompt, safe_paths, max_retries=max_retries)
+        print("  ✅ [Vision Fallback] Extraction Gemini 1.5 Flash réussie.")
+        return result
+    except Exception as e:
+        print(f"  ❌ [Vision Fallback Failed] Échec critique de Gemini 2.0 Flash : {e}")
+        raise ValueError(f"Les deux modèles Vision (Qwen2.5-VL et Gemini) ont échoué. Dernier échec : {e}")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -226,7 +289,7 @@ RÈGLES :
 
 Réponds UNIQUEMENT en JSON valide :
 {
-  "contexte_mission_globale": "Description brève de l'objectif",
+  "contexte_mission_globale": "Description brève du contexte général de l'appel d'offres, si identifiable.",
   "liste_profils_detectes": [
     {
       "nom": "Chef de mission",
@@ -292,7 +355,7 @@ RÈGLES STRICTES :
 4. Capture TOUS les sous-critères, même ceux à faible barème (0.375 pt, 0.5 pt).
 5. Si le tableau continue sur la page suivante → lis toutes les pages fournies.
 6. NOTATION CONDITIONNELLE : S'il y a des colonnes ou des sous-lignes indiquant des conditions de niveau ou de durée (ex: "< Bac + 5", ">= Bac + 5", "< 3 ans"), la 'regle_notation' DOIT expliquer la mécanique exacte. Exemple : "1.5 pts si >= Bac + 5, 0 pt si < Bac + 5".
-7. NOTATION BINAIRE : Si le critère n'a aucune condition détaillée (ex: posséder une certification ou une langue), la 'regle_notation' DOIT être strictement structurée ainsi : "Acquis = maximum des points, Non acquis = 0 pt". N'écris JAMAIS juste "1 pt" ou "0.75 pt".
+7. NOTATION BINAIRE : Si le critère n'a aucune condition détaillée (ex: posséder une certification ou une langue), la 'regle_notation' DOIT être strictly structurée ainsi : "Acquis = maximum des points, Non acquis = 0 pt". N'écris JAMAIS juste "1 pt" ou "0.75 pt".
 
 
 Format JSON strict :
@@ -404,7 +467,7 @@ CHECKLIST :
    Écart > 0.5 pt → critère manquant.
 4. IMPORTANT : Dans "somme_calculee", écris le résultat NUMÉRIQUE (ex: 3.5),
    JAMAIS une expression arithmétique (ex: "1.0 + 0.5").
-5. COUPURE : Si écart persiste → necessite_verification_humaine=true.
+5. COUPURE : Si écart persists → necessite_verification_humaine=true.
 
 Format JSON :
 {{
@@ -484,8 +547,8 @@ def run_tender_multi_agent_pipeline(
 ) -> dict:
     """
     Pipeline IA multi-agents optimisé :
-    - Agent 1 : LLM texte (llama-3.3-70b) → ~3k tokens au lieu de ~200k
-    - Agents 2 & 3 : Vision (llama-4-scout) → tableaux uniquement
+    - Agent 1 : LLM texte (Groq)
+    - Agents 2 & 3 : Vision (Qwen2.5-VL 32B avec Fallback sur Gemini 2.0 Flash)
     """
     # Étape 0a : images PNG pour Agents 2 & 3
     output_dir, all_image_paths = pdf_to_images(pdf_path, start_page, end_page, dpi=dpi)

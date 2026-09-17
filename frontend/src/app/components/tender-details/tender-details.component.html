@@ -1,96 +1,139 @@
-<div class="details-container" style="max-width: 1000px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+<div class="details-container">
   
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    
-    <button routerLink="/" style="padding: 8px 15px; cursor: pointer; background-color: #ddd; border: none; border-radius: 4px; font-weight: bold; color: #333;">
+  <!-- BARRE D'ACTIONS DU HAUT -->
+  <div class="top-actions">
+    <button routerLink="/list" class="btn-back" type="button">
       ⬅ Retour à la liste
     </button>
 
-    <button *ngIf="tender" [routerLink]="['/editor', $any(tender).id]" style="padding: 8px 15px; cursor: pointer; background-color: #2196F3; border: none; border-radius: 4px; font-weight: bold; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <button *ngIf="tender" [routerLink]="['/editor', $any(tender).id]" class="btn-edit" type="button">
       ✏️ Modifier les données
     </button>
-
   </div>
 
-  <div *ngIf="isLoading" style="text-align: center; padding: 50px; font-size: 18px; color: #666;">
-    ⏳ Chargement des détails en cours...
+  <!-- BANNIÈRE DE CHARGEMENT -->
+  <div *ngIf="isLoading" class="banner loading-banner">
+    <div class="spinner"></div>
+    <span>Chargement des détails en cours...</span>
   </div>
 
-  <div *ngIf="hasError" style="padding: 20px; background-color: #f8d7da; color: #721c24; border-radius: 4px; text-align: center; font-weight: bold;">
-    ❌ Impossible de charger cet appel d'offres. Il a peut-être été supprimé.
+  <!-- BANNIÈRE D'ERREUR -->
+  <div *ngIf="hasError" class="banner error-banner">
+    <span>❌ Impossible de charger cet appel d'offres. Il a peut-être été supprimé.</span>
   </div>
 
-  <div *ngIf="!isLoading && !hasError && tender">
+  <!-- CONTENU PRINCIPAL -->
+  <div *ngIf="!isLoading && !hasError && tender" class="details-content">
     
-    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 5px solid #2196F3; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-      <h1 style="margin: 0 0 10px 0; color: #333;">{{ tender.title || 'Appel d\'offres sans titre' }}</h1>
-      <p style="margin: 0; color: #555; font-size: 16px;">
-        <strong>Référence :</strong> <span style="background: #e3f2fd; padding: 2px 8px; border-radius: 4px; color: #1976d2;">{{ tender.reference }}</span> <br><br>
-        <strong>Statut :</strong> 
-        <span style="color: green; font-weight: bold;" *ngIf="tender.status === 'Analysé' || tender.extracted_data">✔ Analysé par l'IA</span>
-        <span style="color: #ff9800; font-weight: bold;" *ngIf="tender.status !== 'Analysé' && !tender.extracted_data">⏳ En attente d'analyse</span>
-      </p>
-    </div>
+    <!-- CARTE D'EN-TÊTE DE L'APPEL D'OFFRES -->
+    <section class="card tender-header-card">
+      <h1 class="tender-title">{{ tender.title || 'Appel d\'offres sans titre' }}</h1>
+      
+      <div class="tender-meta-group">
+        <div class="meta-item">
+          <span class="meta-label">Référence :</span>
+          <span class="badge-ref">{{ tender.reference }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Statut :</span>
+          <span class="badge-status status-success" *ngIf="tender.status === 'Analysé' || tender.extracted_data">
+            ✔ Analysé par l'IA
+          </span>
+          <span class="badge-status status-pending" *ngIf="tender.status !== 'Analysé' && !tender.extracted_data">
+            ⏳ En attente d'analyse
+          </span>
+        </div>
+      </div>
+    </section>
 
-    <div *ngIf="tender.extracted_data.contexte_mission_globale" style="background-color: #e8eaf6; padding: 20px; border-radius: 8px; border-left: 5px solid #3f51b5; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-      <h3 style="margin-top: 0; color: #3f51b5; font-size: 18px;">🌐 Contexte de la mission</h3>
-      <p style="margin: 0; color: #333; line-height: 1.5; font-size: 15px;">
+    <!-- CARTE CONTEXTE DE LA MISSION -->
+    <section *ngIf="tender.extracted_data?.contexte_mission_globale" class="card context-card">
+      <h3 class="card-subtitle">🌐 Contexte de la mission</h3>
+      <p class="context-text">
         {{ tender.extracted_data.contexte_mission_globale }}
       </p>
-    </div>
+    </section>
 
-    <h2 style="border-bottom: 2px solid #eee; padding-bottom: 10px; color: #333;">👥 Profils demandés</h2>
-
-    <div *ngIf="tender.extracted_data.profils; else noProfiles" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; margin-top: 20px;">
+    <!-- CARTE PÉRIMÈTRE GÉOGRAPHIQUE -->
+    <section class="card context-card">
+      <h3 class="card-subtitle">📍 Périmètre géographique (Pays/Régions & sous-régions)</h3>
       
-      <div *ngFor="let profile of tender.extracted_data.profils" style="background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 20px; transition: transform 0.2s;">
-        
-        <h3 style="margin-top: 0; color: #9C27B0; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-          <span>{{ profile.titre_du_poste || 'Profil non nommé' }}</span>
-          <span *ngIf="profile.quantite_demandee" style="background-color: #f3e5f5; color: #8e24aa; font-size: 13px; padding: 4px 10px; border-radius: 20px;">
-            x{{ profile.quantite_demandee }} demandé(s)
-          </span>
-        </h3>
+      <!-- CAS 1 : Si au moins un pays est renseigné -->
+      <div *ngIf="tender.regions_ciblees && tender.regions_ciblees.length > 0; else emptyRegions" class="regions-badges-container">
+        <span *ngFor="let region of tender.regions_ciblees" class="region-badge">
+          {{ region }}
+        </span>
+      </div>
 
-        <div *ngIf="profile.criteres_evaluation && profile.criteres_evaluation.length > 0">
-          <h4 style="margin: 15px 0 10px 0; font-size: 14px; color: #555; text-transform: uppercase; letter-spacing: 0.5px;">📋 Critères d'évaluation</h4>
+      <!-- CAS 2 : Si la liste est vide ou indéfinie -->
+      <ng-template #emptyRegions>
+        <div class="empty-region-msg">
+          ⚠️ Aucune région renseignée. Cette section doit être remplie manuellement.
+        </div>
+      </ng-template>
+    </section>
+
+
+    <!-- SECTION PROFILS DEMANDÉS -->
+    <section class="profiles-section">
+      <div class="section-heading">
+        <h2>👥 Profils demandés</h2>
+      </div>
+
+      <div *ngIf="tender.extracted_data?.profils; else noProfiles" class="profiles-grid">
+        
+        <div *ngFor="let profile of tender.extracted_data.profils" class="card profile-card">
           
-          <ul style="list-style-type: none; padding-left: 0; margin: 0;">
-            <li *ngFor="let critere of profile.criteres_evaluation" style="margin-bottom: 15px; padding: 12px; background-color: #f8f9fa; border-left: 3px solid #9C27B0; border-radius: 4px; font-size: 13px;">
-              
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-                <strong style="color: #333; text-transform: capitalize;">
-                  {{ critere.type_critere ? critere.type_critere.replace('_', ' ') : 'Critère' }}
-                </strong>
-                <span *ngIf="critere.points_maximum" style="background-color: #e1bee7; color: #4a148c; padding: 3px 8px; border-radius: 12px; font-weight: bold; white-space: nowrap; margin-left: 10px;">
-                  Max: {{ critere.points_maximum }} pts
-                </span>
-              </div>
-              
-              <div *ngIf="critere.libelle_exigence" style="color: #444; line-height: 1.4; margin-bottom: 5px;">
-                {{ critere.libelle_exigence }}
-              </div>
-              
-              <div *ngIf="critere.regle_notation" style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ddd; font-style: italic; color: #00796b; font-size: 12px;">
-                📐 <strong>Notation :</strong> {{ critere.regle_notation }}
-              </div>
+          <div class="profile-header">
+            <h3 class="profile-title">{{ profile.titre_du_poste || 'Profil non nommé' }}</h3>
+            <span *ngIf="profile.quantite_demandee" class="badge-quantity">
+              x{{ profile.quantite_demandee }} demandé(s)
+            </span>
+          </div>
 
-              
+          <!-- LISTE DES CRITÈRES D'ÉVALUATION -->
+          <div *ngIf="profile.criteres_evaluation && profile.criteres_evaluation.length > 0" class="criteria-container">
+            <h4 class="criteria-title">📋 Critères d'évaluation</h4>
+            
+            <div class="criteria-list">
+              <div *ngFor="let critere of profile.criteres_evaluation" class="criterion-item">
+                
+                <div class="criterion-header">
+                  <strong class="criterion-type">
+                    {{ critere.type_critere ? critere.type_critere.replace('_', ' ') : 'Critère' }}
+                  </strong>
+                  <span *ngIf="critere.points_maximum" class="badge-points">
+                    Max: {{ critere.points_maximum }} pts
+                  </span>
+                </div>
+                
+                <div *ngIf="critere.libelle_exigence" class="criterion-desc">
+                  {{ critere.libelle_exigence }}
+                </div>
+                
+                <div *ngIf="critere.regle_notation" class="criterion-rule">
+                  📐 <strong>Notation :</strong> {{ critere.regle_notation }}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- OBSERVATIONS -->
+          <div *ngIf="profile.observations" class="observation-box">
+            <strong>💡 Observation :</strong> {{ profile.observations }}
+          </div>
 
-              
-            </li>
-          </ul>
         </div>
-        
-        <div *ngIf="profile.observations" style="margin-top: 15px; padding: 10px; background-color: #fff9c4; border-radius: 4px; font-size: 13px; color: #5c5c5c;">
-          <strong>💡 Observation :</strong> {{ profile.observations }}
+      </div>
+
+      <!-- TEMPLATE AUCUN PROFIL -->
+      <ng-template #noProfiles>
+        <div class="banner warning-banner">
+          ⚠️ Aucun profil n'a été trouvé dans l'analyse de cet appel d'offres.
         </div>
+      </ng-template>
 
-      </div>
-    </div>
+    </section>
 
-    <ng-template #noProfiles>
-      <div style="padding: 20px; background-color: #fff3cd; color: #856404; border-radius: 4px; border-left: 5px solid #ffeeba; margin-top: 20px;">
-        ⚠️ Aucun profil n'a été trouvé dans l'analyse de cet appel d'offres.
-      </div>
-    </ng-template>
+  </div>
+</div>

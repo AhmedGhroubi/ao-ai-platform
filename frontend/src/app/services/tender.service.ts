@@ -35,6 +35,7 @@ export interface TenderResponse {
     contexte_mission_globale: string;
     profils: Profil[];
   };
+  regions_ciblees: string[];
 }
 
 @Injectable({

@@ -1,80 +1,113 @@
-<div class="details-container" style="max-width: 1000px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+<div class="details-container">
   
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <button routerLink="/experts" style="padding: 8px 15px; cursor: pointer; background-color: #ddd; border: none; border-radius: 4px; font-weight: bold; color: #333;">
+  <!-- BARRE DE NAVIGATION ET ACTIONS -->
+  <div class="nav-bar">
+    <button routerLink="/experts" class="btn-secondary">
       ⬅ Retour à la liste
     </button>
-    <button *ngIf="expert && expert.id" [routerLink]="['/experts/edit', expert.id]" style="padding: 8px 15px; cursor: pointer; background-color: #2196F3; border: none; border-radius: 4px; font-weight: bold; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <button *ngIf="expert && expert.id" [routerLink]="['/experts/edit', expert.id]" class="btn-primary">
       ✏️ Modifier les données
     </button>
   </div>
 
-  <div *ngIf="isLoading" style="text-align: center; padding: 50px; font-size: 18px; color: #666;">
-    ⏳ Chargement des détails en cours...
+  <!-- ÉTAT : CHARGEMENT -->
+  <div *ngIf="isLoading" class="state-card loading-card">
+    <div class="spinner"></div>
+    <p>⏳ Chargement des détails de l'expert en cours...</p>
   </div>
 
-  <div *ngIf="hasError" style="padding: 20px; background-color: #f8d7da; color: #721c24; border-radius: 4px; text-align: center; font-weight: bold;">
-    ❌ Impossible de charger cet expert. Il a peut-être été supprimé.
+  <!-- ÉTAT : ERREUR -->
+  <div *ngIf="hasError" class="state-card error-card">
+    ❌ Impossible de charger cet expert. Il a peut-être été supprimé ou n'existe pas.
   </div>
 
-  <div *ngIf="!isLoading && !hasError && expert">
+  <!-- CONTENU PRINCIPAL -->
+  <div *ngIf="!isLoading && !hasError && expert" class="details-content">
     
-    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 5px solid #2196F3; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-      <h1 style="margin: 0 0 10px 0; color: #333;">{{ expert.nom_expert || 'Expert en cours d\'identification...' }}</h1>
-      <p style="margin: 0; color: #555; font-size: 16px;">
-        <strong>Document source :</strong> <span style="background: #e3f2fd; padding: 2px 8px; border-radius: 4px; color: #1976d2;">{{ expert.filename }}</span> <br><br>
-        <strong>Statut :</strong> 
-        <span style="color: green; font-weight: bold;" *ngIf="expert.status === 'Analysé' || expert.extracted_data">✔ Analysé par l'IA</span>
-        <span style="color: #ff9800; font-weight: bold;" *ngIf="expert.status !== 'Analysé' && !expert.extracted_data">⏳ En attente d'analyse</span>
-      </p>
+    <!-- EN-TÊTE DE L'EXPERT -->
+    <div class="card expert-header-card">
+      <div class="header-main">
+        <span class="expert-avatar">👤</span>
+        <div>
+          <h1>{{ expert.nom_expert || 'Expert en cours d\'identification...' }}</h1>
+          <div class="meta-row">
+            <span><strong>Document source :</strong> <span class="doc-badge">📄 {{ expert.filename }}</span></span>
+            <span><strong>Statut :</strong> 
+              <span class="status-badge status-success" *ngIf="expert.status === 'Analysé' || expert.extracted_data">✔ Analysé par l'IA</span>
+              <span class="status-badge status-warning" *ngIf="expert.status !== 'Analysé' && !expert.extracted_data">⏳ En attente d'analyse</span>
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <!-- DONNÉES EXTRAITES -->
     <ng-container *ngIf="expert.extracted_data">
       
-      <div style="background-color: #e8eaf6; padding: 20px; border-radius: 8px; border-left: 5px solid #3f51b5; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-        <h3 style="margin-top: 0; color: #3f51b5; font-size: 18px;">🌐 Informations Générales</h3>
+      <!-- INFORMATIONS GÉNÉRALES ET ÉTUDES -->
+      <div class="card info-card">
+        <h3 class="card-title text-indigo">🌐 Informations Générales</h3>
         
-        <div style="margin: 0; color: #333; font-size: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; line-height: 1.5;">
-          <div><strong>Poste principal :</strong> {{ expert.extracted_data.titre_poste_principal || '—' }}</div>
-          <div><strong>Expérience totale :</strong> {{ expert.extracted_data.annees_experience_total ? expert.extracted_data.annees_experience_total + ' ans' : '—' }}</div>
-          <div><strong>Nationalité :</strong> {{ expert.extracted_data.nationalite || '—' }}</div>
-          <div><strong>Date de naissance :</strong> {{ expert.extracted_data.date_naissance || '—' }}</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Poste principal</span>
+            <strong>{{ expert.extracted_data.titre_poste_principal || '—' }}</strong>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Expérience totale</span>
+            <strong>{{ expert.extracted_data.annees_experience_total ? expert.extracted_data.annees_experience_total + ' ans' : '—' }}</strong>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Nationalité</span>
+            <strong>{{ expert.extracted_data.nationalite || '—' }}</strong>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Date de naissance</span>
+            <strong>{{ expert.extracted_data.date_naissance || '—' }}</strong>
+          </div>
         </div>
 
-        <div *ngIf="expert.extracted_data.etudes && expert.extracted_data.etudes.length > 0" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #cbd5e1; font-size: 14px; color: #444;">
-          <strong>🎓 Études et Formations :</strong>
-          <div *ngFor="let etude of expert.extracted_data.etudes" style="margin-top: 8px; padding: 10px; background: white; border: 1px solid #e2e8f0; border-radius: 4px;">
-            <strong>{{ etude.diplome || 'Formation non précisée' }}</strong> 
-            <span *ngIf="etude.institution"> - {{ etude.institution }}</span>
-            <span *ngIf="etude.annee" style="color: #777;"> ({{ etude.annee }})</span>
+        <!-- FORMATIONS / ÉTUDES -->
+        <div *ngIf="expert.extracted_data.etudes && expert.extracted_data.etudes.length > 0" class="education-section">
+          <span class="section-subtitle">🎓 Études et Formations</span>
+          <div class="education-list">
+            <div *ngFor="let etude of expert.extracted_data.etudes" class="education-item">
+              <strong>{{ etude.diplome || 'Formation non précisée' }}</strong> 
+              <span *ngIf="etude.institution" class="institution"> - {{ etude.institution }}</span>
+              <span *ngIf="etude.annee" class="year">({{ etude.annee }})</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div *ngIf="expert.extracted_data.competences_techniques?.length || expert.extracted_data.certifications?.length || expert.extracted_data.langues?.length" style="background-color: #f1f8e9; padding: 20px; border-radius: 8px; border-left: 5px solid #8bc34a; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-        <h3 style="margin-top: 0; color: #558b2f; font-size: 18px;">🛠 Compétences, Certifications & Langues</h3>
+      <!-- COMPÉTENCES, CERTIFICATIONS & LANGUES -->
+      <div *ngIf="expert.extracted_data.competences_techniques?.length || expert.extracted_data.certifications?.length || expert.extracted_data.langues?.length" class="card skills-card">
+        <h3 class="card-title text-emerald">🛠 Compétences, Certifications & Langues</h3>
 
-        <div *ngIf="expert.extracted_data.competences_techniques && expert.extracted_data.competences_techniques.length > 0" style="margin-bottom: 20px;">
-          <strong>💻 Compétences Techniques :</strong>
-          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
-            <span *ngFor="let comp of expert.extracted_data.competences_techniques" style="background-color: #e8f5e9; color: #2e7d32; padding: 5px 12px; border-radius: 20px; font-size: 13px; border: 1px solid #c8e6c9;">
+        <!-- TECH SKILLS -->
+        <div *ngIf="expert.extracted_data.competences_techniques && expert.extracted_data.competences_techniques.length > 0" class="skills-block">
+          <span class="section-subtitle">💻 Compétences Techniques</span>
+          <div class="tags-container">
+            <span *ngFor="let comp of expert.extracted_data.competences_techniques" class="tag tag-skill">
               {{ comp }}
             </span>
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        <div class="grid-2-cols">
+          <!-- CERTIFICATIONS -->
           <div *ngIf="expert.extracted_data.certifications && expert.extracted_data.certifications.length > 0">
-            <strong>🏅 Certifications :</strong>
-            <ul style="margin: 8px 0 0 0; padding-left: 20px; font-size: 14px; color: #444; line-height: 1.6;">
+            <span class="section-subtitle">🏅 Certifications</span>
+            <ul class="custom-bullet-list">
               <li *ngFor="let certif of expert.extracted_data.certifications">{{ certif }}</li>
             </ul>
           </div>
 
+          <!-- LANGUES -->
           <div *ngIf="expert.extracted_data.langues && expert.extracted_data.langues.length > 0">
-            <strong>🗣 Langues :</strong>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
-              <span *ngFor="let langue of expert.extracted_data.langues" style="background-color: #fff3e0; color: #e65100; padding: 5px 12px; border-radius: 20px; font-size: 13px; border: 1px solid #ffe0b2;">
+            <span class="section-subtitle">🗣 Langues</span>
+            <div class="tags-container">
+              <span *ngFor="let langue of expert.extracted_data.langues" class="tag tag-language">
                 {{ langue }}
               </span>
             </div>
@@ -82,67 +115,72 @@
         </div>
       </div>
 
-      <h2 style="border-bottom: 2px solid #eee; padding-bottom: 10px; color: #333; margin-top: 40px;">💼 Parcours Professionnel</h2>
+      <!-- PARCOURS PROFESSIONNEL -->
+      <div class="section-group">
+        <h2 class="section-title">💼 Parcours Professionnel</h2>
 
-      <div *ngIf="expert.extracted_data.experiences_professionnelles && expert.extracted_data.experiences_professionnelles.length > 0; else noExperiences" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; margin-top: 20px;">
-        <div *ngFor="let exp of expert.extracted_data.experiences_professionnelles" style="background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 20px; transition: transform 0.2s;">
-          
-          <h3 style="margin-top: 0; color: #9C27B0; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 16px;">
-            <span>{{ exp.poste || 'Poste non spécifié' }}</span>
-            <span *ngIf="exp.periode" style="background-color: #f3e5f5; color: #8e24aa; font-size: 12px; padding: 4px 10px; border-radius: 20px; white-space: nowrap;">
-              {{ exp.periode }}
-            </span>
-          </h3>
+        <div *ngIf="expert.extracted_data.experiences_professionnelles && expert.extracted_data.experiences_professionnelles.length > 0; else noExperiences" class="cards-grid">
+          <div *ngFor="let exp of expert.extracted_data.experiences_professionnelles" class="card experience-card">
+            
+            <div class="card-item-header">
+              <h3>{{ exp.poste || 'Poste non spécifié' }}</h3>
+              <span *ngIf="exp.periode" class="pill-badge purple-pill">
+                {{ exp.periode }}
+              </span>
+            </div>
 
-          <div style="margin-bottom: 15px; font-size: 14px; color: #555;">
-            🏢 <strong>Employeur :</strong> {{ exp.employeur || 'Non renseigné' }} 
-            <span *ngIf="exp.pays" style="color: #777;">({{ exp.pays }})</span>
-          </div>
+            <div class="company-info">
+              🏢 <strong>Employeur :</strong> {{ exp.employeur || 'Non renseigné' }} 
+              <span *ngIf="exp.pays" class="country-text">({{ exp.pays }})</span>
+            </div>
 
-          <div *ngIf="exp.resume_activites && exp.resume_activites.length > 0">
-            <ul style="list-style-type: none; padding-left: 0; margin: 0;">
-              <li *ngFor="let activite of exp.resume_activites" style="margin-bottom: 5px; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #9C27B0; border-radius: 4px; font-size: 13px; color: #333; line-height: 1.4;">
-                {{ activite }}
-              </li>
-            </ul>
+            <div *ngIf="exp.resume_activites && exp.resume_activites.length > 0" class="activities-list">
+              <ul>
+                <li *ngFor="let activite of exp.resume_activites">
+                  {{ activite }}
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
+
+        <ng-template #noExperiences>
+          <div class="alert-box warning-alert">
+            ⚠️ Aucune ligne d'expérience professionnelle n'a pu être extraite de ce CV.
+          </div>
+        </ng-template>
       </div>
 
-      <ng-template #noExperiences>
-        <div style="padding: 20px; background-color: #fff3cd; color: #856404; border-radius: 4px; border-left: 5px solid #ffeeba; margin-top: 20px;">
-          ⚠️ Aucune ligne d'expérience professionnelle n'a pu être extraite de ce CV.
-        </div>
-      </ng-template>
+      <!-- PROJETS & MISSIONS -->
+      <div class="section-group">
+        <h2 class="section-title">📂 Projets & Missions</h2>
 
-
-      <h2 style="border-bottom: 2px solid #eee; padding-bottom: 10px; color: #333; margin-top: 40px;">📂 Projets & Missions</h2>
-
-      <div *ngIf="expert.extracted_data.projets_et_missions && expert.extracted_data.projets_et_missions.length > 0; else noProjets" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; margin-top: 20px;">
-        
-        <div *ngFor="let projet of expert.extracted_data.projets_et_missions" style="background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 20px; transition: transform 0.2s;">
+        <div *ngIf="expert.extracted_data.projets_et_missions && expert.extracted_data.projets_et_missions.length > 0; else noProjets" class="cards-grid">
           
-          <h3 style="margin-top: 0; color: #009688; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 15px; line-height: 1.4;">
-            <span>{{ projet.nom_projet || 'Projet non spécifié' }}</span>
-            <span *ngIf="projet.annee" style="background-color: #e0f2f1; color: #00796b; font-size: 12px; padding: 4px 10px; border-radius: 20px; white-space: nowrap;">
-              {{ projet.annee }}
-            </span>
-          </h3>
+          <div *ngFor="let projet of expert.extracted_data.projets_et_missions" class="card project-card">
+            
+            <div class="card-item-header">
+              <h3>{{ projet.nom_projet || 'Projet non spécifié' }}</h3>
+              <span *ngIf="projet.annee" class="pill-badge teal-pill">
+                {{ projet.annee }}
+              </span>
+            </div>
 
-          <div style="font-size: 14px; color: #555; line-height: 1.8;">
-            <div>🧑‍💻 <strong>Rôle :</strong> {{ projet.poste_occupe || 'Non spécifié' }}</div>
-            <div>🏢 <strong>Client/Bailleur :</strong> {{ projet.client_ou_bailleur || 'Non spécifié' }}</div>
-            <div *ngIf="projet.pays">🌍 <strong>Pays :</strong> {{ projet.pays }}</div>
+            <div class="project-details">
+              <div>🧑‍💻 <strong>Rôle :</strong> {{ projet.poste_occupe || 'Non spécifié' }}</div>
+              <div>🏢 <strong>Client/Bailleur :</strong> {{ projet.client_ou_bailleur || 'Non spécifié' }}</div>
+              <div *ngIf="projet.pays">🌍 <strong>Pays :</strong> {{ projet.pays }}</div>
+            </div>
+
           </div>
-
         </div>
+
+        <ng-template #noProjets>
+          <div class="alert-box info-alert">
+            ℹ️ Aucun projet spécifique n'a pu être extrait.
+          </div>
+        </ng-template>
       </div>
-
-      <ng-template #noProjets>
-        <div style="padding: 20px; background-color: #f8f9fa; color: #6c757d; border-radius: 4px; border-left: 5px solid #ced4da; margin-top: 20px;">
-          ℹ️ Aucun projet spécifique n'a pu être extrait.
-        </div>
-      </ng-template>
 
     </ng-container>
 

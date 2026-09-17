@@ -5,6 +5,9 @@ from app.api.tender import router as tender_router
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.expert import Expert
 from app.api.expert import router as expert_router
+from app.models.tender_staffing import TenderStaffing
+from app.api.tender_staffing import router as tender_staffing_router
+from app.api import dashboard_router
 # Crée les tables SQL
 Base.metadata.create_all(bind=engine)
 
@@ -33,3 +36,5 @@ def read_root():
     }
 
 app.include_router(expert_router, prefix="/api")
+app.include_router(tender_staffing_router, prefix="/api")
+app.include_router(dashboard_router.router)

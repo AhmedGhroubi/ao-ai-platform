@@ -1,20 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { RouterModule, ActivatedRoute } from '@angular/router'; 
+import { FormsModule } from '@angular/forms'; // Nécessaire pour [(ngModel)]
 import { TenderService, TenderResponse } from '../../services/tender.service';
 
 @Component({
   selector: 'app-tender-details',
-  standalone: true, // Requis pour Angular moderne sans module
-  imports: [CommonModule, RouterModule], 
+  standalone: true,
+  imports: [CommonModule, RouterModule, FormsModule], // Ajout de FormsModule
   templateUrl: './tender-details.component.html',
   styleUrls: ['./tender-details.component.css']
 })
 export class TenderDetailsComponent implements OnInit {
-  // Remplacement de 'any' par notre type fort multi-agents
+  // Alignement des variables avec votre template HTML
   tender: TenderResponse | null = null;
+  extractedData: any = null;
+  
+  // Variable pour le champ textarea des régions
+  scopeGeographiqueText: string = '';
+  
   isLoading: boolean = true;
   hasError: boolean = false;
+  isSaving: boolean = false;
+  showSuccessMessage: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -27,11 +35,9 @@ export class TenderDetailsComponent implements OnInit {
     if (id) {
       this.tenderService.getTenderById(+id).subscribe({
         next: (data) => {
-          // On utilise une variable temporaire 'any' pour exécuter tes filtres 
-          // de sécurité sans que TypeScript ne lève d'erreur de compilation.
           let cleanData: any = data;
 
-          // 🛡️ SÉCURITÉ 1 : Si la base de données renvoie un texte au lieu d'un objet JSON, on le transforme.
+          // 🛡️ SÉCURITÉ 1 : Parsing JSON si nécessaire
           if (typeof cleanData.extracted_data === 'string') {
             try {
               cleanData.extracted_data = JSON.parse(cleanData.extracted_data);
@@ -40,15 +46,23 @@ export class TenderDetailsComponent implements OnInit {
             }
           }
 
-          // 🛡️ SÉCURITÉ 2 : On corrige la "double imbrication" (extracted_data dans extracted_data)
+          // 🛡️ SÉCURITÉ 2 : Correction double imbrication
           if (cleanData.extracted_data && cleanData.extracted_data.extracted_data) {
             cleanData.extracted_data = cleanData.extracted_data.extracted_data;
           }
 
-          // Affectation finale aux données typées
+          // Affectation aux variables utilisées dans le HTML
           this.tender = cleanData as TenderResponse;
+          this.extractedData = this.tender.extracted_data;
 
-          console.log("🟢 Données nettoyées prêtes pour le HTML (Multi-Agents) :", this.tender);
+          // 🌍 CHARGEMENT DES RÉGIONS : Conversion du tableau en texte pour le textarea
+          if (this.tender.regions_ciblees && Array.isArray(this.tender.regions_ciblees)) {
+            this.scopeGeographiqueText = this.tender.regions_ciblees.join(', ');
+          } else {
+            this.scopeGeographiqueText = '';
+          }
+
+          console.log("🟢 Données nettoyées prêtes pour le HTML :", this.tender);
           this.isLoading = false;
         },
         error: (err) => {
@@ -61,5 +75,35 @@ export class TenderDetailsComponent implements OnInit {
       this.hasError = true;
       this.isLoading = false;
     }
+  }
+
+  
+
+  // --- Méthodes utilitaires pour la gestion des profils (déjà prévues dans votre HTML) ---
+
+  addProfile(): void {
+    this.extractedData.profils.push({
+      titre_du_poste: '',
+      quantite_demandee: 1,
+      observations: '',
+      criteres_evaluation: []
+    });
+  }
+
+  removeProfile(index: number): void {
+    this.extractedData.profils.splice(index, 1);
+  }
+
+  addCriterion(profileIndex: number): void {
+    this.extractedData.profils[profileIndex].criteres_evaluation.push({
+      type_critere: '',
+      libelle_exigence: '',
+      points_maximum: 1,
+      regle_notation: ''
+    });
+  }
+
+  removeCriterion(profileIndex: number, criterionIndex: number): void {
+    this.extractedData.profils[profileIndex].criteres_evaluation.splice(criterionIndex, 1);
   }
 }

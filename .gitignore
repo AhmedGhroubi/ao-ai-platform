@@ -1,30 +1,55 @@
-# --- Environnement & Secrets ---
+# =========================
+# Environment
+# =========================
 .env
-*.log
-.secrets
+.env.*
 
-# --- Python & Backend ---
+# =========================
+# Python
+# =========================
 __pycache__/
 *.py[cod]
 .venv/
 venv/
-ENV/
-.pytest_cache/
+*.egg-info/
 
-# --- Angular Frontend ---
-frontend/node_modules/
-frontend/.angular/
-frontend/dist/
+# =========================
+# Backend generated files
+# =========================
+backend/justification_cache.json
 
-# --- Stockage local & Data ---
-# On ignore les fichiers d'uploads mais on garde la structure des dossiers
-storage/uploads/cvs/*
-storage/uploads/tenders/*
-storage/processed/*
-storage/exports/*
-!**/		# Permet de ne pas ignorer la structure des sous-dossiers vides
-!**.gitkeep # Si tu as mis des fichiers .gitkeep pour pousser les dossiers vides
+# =========================
+# Uploaded CVs
+# =========================
+backend/storage/uploads/
 
-# --- Docker & DB locales ---
-.docker/
-elasticsearch/data/
+# =========================
+# Uploaded tenders
+# =========================
+storage/
+
+# =========================
+# Database
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Frontend
+# =========================
+node_modules/
+dist/
+.angular/
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db

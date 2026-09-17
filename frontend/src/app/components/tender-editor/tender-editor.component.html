@@ -1,126 +1,200 @@
-<div class="editor-container" *ngIf="tenderData" style="max-width: 900px; margin: auto; padding: 20px; padding-bottom: 60px; font-family: sans-serif;">
+<div class="editor-container" *ngIf="tenderData">
   
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-    <h2>✏️ Gestion des Profils & Critères : {{ tenderData.reference }}</h2>
-    <button routerLink="/list" style="padding: 8px 15px; cursor: pointer; background-color: #555; color: white; border: none; border-radius: 4px;">
-      ⬅ Retour à la liste
-    </button>
-  </div>
+  <!-- BARRE D'ACTIONS DU HAUT ET EN-TÊTE -->
+  <div class="top-actions">
+    <div class="header-title-group">
+      <h2>✏️ Gestion des Profils & Critères</h2>
+      <span class="badge-ref">{{ tenderData.reference }}</span>
+    </div>
 
-  <div style="background-color: #f0f4f8; padding: 15px; border-radius: 6px; margin-bottom: 25px; border-left: 4px solid #0056b3;">
-    <label style="font-weight: bold; display: block; margin-bottom: 5px;">🌍 Contexte / Mission Globale :</label>
-    <textarea 
-      [(ngModel)]="extractedData.contexte_mission_globale" 
-      rows="3" 
-      style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
-      placeholder="Entrez le contexte général de l'appel d'offres...">
-    </textarea>
-  </div>
+    <!-- GROUPE DE BOUTONS D'ACTION (HAUT) -->
+    <div class="header-buttons-group">
+      <button routerLink="/list" class="btn-back" type="button">
+        ⬅ Retour à la liste
+      </button>
 
-  <div *ngFor="let profile of extractedData.profils; let pIndex = index" 
-       style="border: 1px solid #ddd; padding: 20px; margin-bottom: 30px; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-    
-    <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end;">
-      <div style="flex: 2;">
-        <label style="font-weight: bold; color: #333; font-size: 13px;">Titre du Poste :</label>
-        <input 
-          [(ngModel)]="profile.titre_du_poste" 
-          style="width: 100%; padding: 10px; font-size: 16px; border: 1px solid #bbb; border-radius: 4px; font-weight: 500;" 
-        />
-      </div>
-      <div style="width: 120px;">
-        <label style="font-weight: bold; color: #333; font-size: 13px;">Quantité :</label>
-        <input 
-          type="number" 
-          [(ngModel)]="profile.quantite_demandee" 
-          style="width: 100%; padding: 10px; font-size: 16px; border: 1px solid #bbb; border-radius: 4px; text-align: center;" 
-        />
-      </div>
-      <button (click)="removeProfile(pIndex)" style="background-color: #dc3545; color: white; border: none; padding: 11px 15px; cursor: pointer; border-radius: 4px;">
-        🗑️ Supprimer le profil
+      <button 
+        class="btn-save-top" 
+        (click)="onValidate()" 
+        [disabled]="isSaving"
+        type="button">
+        <span *ngIf="isSaving">⏳ Enregistrement...</span>
+        <span *ngIf="!isSaving">💾 Valider les modifications</span>
       </button>
     </div>
+  </div>
 
-    <div style="margin-bottom: 20px;">
-      <label style="font-size: 12px; color: #666;">Observations / Remarques IA sur ce poste :</label>
-      <input [(ngModel)]="profile.observations" placeholder="Aucune observation" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" />
-    </div>
+  <!-- CONTEXTE DE LA MISSION GLOBALE -->
+  <section class="card context-card">
+    <label class="form-label font-bold">🌍 Contexte / Mission Globale :</label>
+    <textarea 
+      class="form-control"
+      [(ngModel)]="extractedData.contexte_mission_globale" 
+      rows="3" 
+      placeholder="Entrez le contexte général de l'appel d'offres...">
+    </textarea>
+  </section>
 
-    <div style="margin-left: 20px; padding-left: 15px; border-left: 2px dashed #ccc;">
-      <h4 style="margin: 0 0 10px 0; color: #555; font-size: 14px;">📋 Critères d'évaluation requis :</h4>
-      
-      <div *ngFor="let criterion of profile.criteres_evaluation; let cIndex = index" 
-           style="background-color: #fafafa; border: 1px solid #eee; padding: 12px; margin-bottom: 10px; border-radius: 6px; display: flex; flex-direction: column; gap: 8px; position: relative;">
+  <!-- SECTION PÉRIMÈTRE GÉOGRAPHIQUE (PAYS PAR PAYS AVEC DÉTECTION DES DOUBLONS) -->
+  <section class="card context-card">
+    <label class="form-label font-bold">🌐 Périmètre géographique de l'AO :</label>
+    
+    <div class="regions-list">
+      <div *ngFor="let region of regionsList; let i = index; trackBy: trackByIndex" class="region-item-wrapper">
         
-        <div style="display: flex; gap: 10px; align-items: center;">
+        <div class="region-row">
           <input 
-            [(ngModel)]="criterion.type_critere" 
-            placeholder="Type de critère" 
-            style="width: 150px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: #555;" 
-            />
-          
-          <input 
-            [(ngModel)]="criterion.libelle_exigence" 
-            placeholder="Libellé de l'exigence (ex: Diplôme Bac+5 en informatique...)" 
-            style="flex-grow: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px;" 
+            type="text" 
+            class="form-control region-input" 
+            [class.is-duplicate]="isDuplicateRegion(i)"
+            [(ngModel)]="regionsList[i]" 
+            placeholder="Entrez un pays ou une région..." 
           />
-          
-          <button (click)="removeCriterion(pIndex, cIndex)" style="background: transparent; border: none; color: #dc3545; cursor: pointer; font-weight: bold; font-size: 16px; padding: 0 5px;">
-            ✖
+          <button 
+            type="button" 
+            class="btn-delete-region" 
+            (click)="removeRegion(i)" 
+            title="Supprimer ce pays">
+            ❌
           </button>
         </div>
 
-        <div style="display: flex; gap: 15px; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 5px;">
-            <label style="font-size: 12px; color: #666; white-space: nowrap;">Points Max :</label>
-            <input 
-              type="number" 
-              step="0.01" 
-              [(ngModel)]="criterion.points_maximum" 
-              style="width: 70px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; text-align: center;" 
-            />
-          </div>
-          <div style="flex-grow: 1; display: flex; align-items: center; gap: 5px;">
-            <label style="font-size: 12px; color: #666; white-space: nowrap;">Règle de calcul :</label>
-            <input 
-              [(ngModel)]="criterion.regle_notation" 
-              placeholder="Ex: 2 pts si >= 5 ans d'expérience, 0 sinon" 
-              style="width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; color: #444;" 
-            />
+        <!-- ⚠️ Avertissement visuel en cas de doublon -->
+        <small *ngIf="isDuplicateRegion(i)" class="duplicate-warning">
+          ⚠️ Ce pays / région est déjà présent dans la liste.
+        </small>
+
+      </div>
+    </div>
+
+    <!-- Bouton pour ajouter un nouveau champ -->
+    <button type="button" class="btn-add-region" (click)="addRegion()">
+      ➕ Ajouter un pays / région
+    </button>
+  </section>
+
+  <!-- LISTE DES PROFILS -->
+  <div class="profiles-list">
+    <div *ngFor="let profile of extractedData.profils; let pIndex = index" class="card profile-card">
+      
+      <!-- EN-TÊTE DU PROFIL -->
+      <div class="profile-header-grid">
+        <div class="form-group flex-title">
+          <label class="form-label">Titre du Poste :</label>
+          <input 
+            class="form-control form-control-lg"
+            [(ngModel)]="profile.titre_du_poste" 
+            placeholder="ex: Chef de Projet, Développeur..."
+          />
+        </div>
+        
+        <div class="form-group qty-group">
+          <label class="form-label">Quantité :</label>
+          <input 
+            type="number" 
+            class="form-control text-center"
+            [(ngModel)]="profile.quantite_demandee" 
+          />
+        </div>
+
+        <button class="btn-danger-outline" (click)="removeProfile(pIndex)" type="button">
+          🗑️ Supprimer le profil
+        </button>
+      </div>
+
+      <!-- OBSERVATIONS -->
+      <div class="form-group observations-group">
+        <label class="form-label-sub">Observations / Remarques IA sur ce poste :</label>
+        <input 
+          class="form-control form-control-sm"
+          [(ngModel)]="profile.observations" 
+          placeholder="Aucune observation" 
+        />
+      </div>
+
+      <!-- CRITÈRES D'ÉVALUATION -->
+      <div class="criteria-section">
+        <h4 class="criteria-section-title">📋 Critères d'évaluation requis :</h4>
+        
+        <div class="criteria-list">
+          <div *ngFor="let criterion of profile.criteres_evaluation; let cIndex = index" class="criterion-edit-item">
+            
+            <div class="criterion-row-top">
+              <input 
+                class="form-control criterion-type-input"
+                [(ngModel)]="criterion.type_critere" 
+                placeholder="Type de critère" 
+              />
+              
+              <input 
+                class="form-control criterion-desc-input"
+                [(ngModel)]="criterion.libelle_exigence" 
+                placeholder="Libellé de l'exigence (ex: Diplôme Bac+5 en informatique...)" 
+              />
+              
+              <button class="btn-remove-crit" (click)="removeCriterion(pIndex, cIndex)" type="button" title="Supprimer ce critère">
+                ✖
+              </button>
+            </div>
+
+            <div class="criterion-row-bottom">
+              <div class="form-inline-group">
+                <label class="form-label-inline">Points Max :</label>
+                <input 
+                  type="number" 
+                  step="0.01" 
+                  class="form-control pts-input text-center"
+                  [(ngModel)]="criterion.points_maximum" 
+                />
+              </div>
+              
+              <div class="form-inline-group flex-grow">
+                <label class="form-label-inline">Règle de calcul :</label>
+                <input 
+                  class="form-control rule-input"
+                  [(ngModel)]="criterion.regle_notation" 
+                  placeholder="Ex: 2 pts si >= 5 ans d'expérience, 0 sinon" 
+                />
+              </div>
+            </div>
+
           </div>
         </div>
 
+        <button class="btn-add-criterion" (click)="addCriterion(pIndex)" type="button">
+          ➕ Ajouter une exigence / critère
+        </button>
       </div>
 
-      <button (click)="addCriterion(pIndex)" style="margin-top: 5px; padding: 6px 12px; cursor: pointer; background-color: #fff; border: 1px solid #007bff; color: #007bff; border-radius: 4px; font-size: 13px; font-weight: 500;">
-        ➕ Ajouter une exigence / critère
-      </button>
     </div>
-
   </div>
 
-  <button (click)="addProfile()" style="width: 100%; padding: 15px; border: 2px dashed #007bff; background: #f4f9ff; cursor: pointer; font-size: 15px; color: #007bff; font-weight: bold; border-radius: 6px; margin-bottom: 30px;">
+  <!-- BOUTON AJOUTER UN PROFIL -->
+  <button class="btn-add-profile" (click)="addProfile()" type="button">
     ➕ Ajouter un nouveau profil de poste
   </button>
 
-  <div *ngIf="showSuccessMessage" class="success-alert">
+  <!-- ALERTE DE SUCCÈS -->
+  <div *ngIf="showSuccessMessage" class="banner success-banner">
     ✅ Modifications enregistrées en base de données avec succès !
   </div>
 
-  <button 
-    class="btn-save" 
-    (click)="onValidate()" 
-    [disabled]="isSaving">
-    
-    <span *ngIf="isSaving">⏳ Enregistrement en cours...</span>
-    
-    <span *ngIf="!isSaving">💾 valider toutes les modifications </span>
-    
-  </button>
-
+  <!-- ACTION DE SAUVEGARDE (BAS DE PAGE) -->
+  <div class="save-actions">
+    <button 
+      class="btn-save" 
+      (click)="onValidate()" 
+      [disabled]="isSaving"
+      type="button">
+      <span *ngIf="isSaving">⏳ Enregistrement en cours...</span>
+      <span *ngIf="!isSaving">💾 Valider toutes les modifications</span>
+    </button>
+  </div>
 
 </div>
 
-<div *ngIf="!tenderData" style="text-align: center; margin-top: 100px; font-family: sans-serif; color: #666;">
-  <p style="font-size: 18px;">⏳ Récupération de la structure de l'Appel d'Offres...</p>
+<!-- ÉTAT DE CHARGEMENT -->
+<div *ngIf="!tenderData" class="loading-state">
+  <div class="spinner"></div>
+  <p>⏳ Récupération de la structure de l'Appel d'Offres...</p>
 </div>

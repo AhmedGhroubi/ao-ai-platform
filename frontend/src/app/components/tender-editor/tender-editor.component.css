@@ -1,0 +1,498 @@
+/* CONTAINER PRINCIPAL */
+.editor-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem;
+  padding-bottom: 4rem;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #1e293b;
+}
+
+/* TOP ACTIONS & HEADER */
+.top-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.75rem;
+}
+
+.header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-title-group h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.badge-ref {
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: 1px solid #bfdbfe;
+}
+
+.btn-back {
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-back:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+/* GROUPE DE BOUTONS HAUT */
+.header-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* BOUTON SAUVEGARDER DU HAUT (COMPACT) */
+.btn-save-top {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  transition: all 0.2s;
+}
+
+.btn-save-top:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.btn-save-top:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+/* CARTES ET FORMULAIRES */
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.context-card {
+  border-left: 6px solid #2563eb;
+  background: #f8fafc;
+}
+
+/* CONTROLES DE FORMULAIRE */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-label {
+  font-weight: 700;
+  color: #334155;
+  font-size: 0.825rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-label-sub {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.form-label-inline {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #0f172a;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.form-control-lg {
+  padding: 10px 14px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.form-control-sm {
+  padding: 6px 10px;
+  font-size: 0.825rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* CARTE PROFIL */
+.profile-card {
+  position: relative;
+  border: 1px solid #e2e8f0;
+}
+
+.profile-header-grid {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.flex-title {
+  flex: 2;
+  min-width: 240px;
+}
+
+.qty-group {
+  width: 110px;
+}
+
+.observations-group {
+  margin-bottom: 1.5rem;
+}
+
+.btn-danger-outline {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 42px;
+}
+
+.btn-danger-outline:hover {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+/* CRITÈRES D'ÉVALUATION */
+.criteria-section {
+  margin-left: 0.5rem;
+  padding-left: 1.25rem;
+  border-left: 3px dashed #cbd5e1;
+}
+
+.criteria-section-title {
+  margin: 0 0 0.85rem 0;
+  color: #475569;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.criteria-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.criterion-edit-item {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.criterion-row-top {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.criterion-type-input {
+  width: 160px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.criterion-desc-input {
+  flex-grow: 1;
+}
+
+.btn-remove-crit {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.btn-remove-crit:hover {
+  background: #fef2f2;
+}
+
+.criterion-row-bottom {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.form-inline-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+.pts-input {
+  width: 80px;
+}
+
+.rule-input {
+  font-size: 0.825rem;
+  color: #0d9488;
+}
+
+/* BOUTONS D'AJOUT */
+.btn-add-criterion {
+  padding: 8px 14px;
+  cursor: pointer;
+  background-color: #ffffff;
+  border: 1px solid #2563eb;
+  color: #2563eb;
+  border-radius: 8px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-add-criterion:hover {
+  background-color: #eff6ff;
+}
+
+.btn-add-profile {
+  width: 100%;
+  padding: 1rem;
+  border: 2px dashed #2563eb;
+  background: #f0f6ff;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #2563eb;
+  font-weight: 700;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  transition: all 0.2s;
+}
+
+.btn-add-profile:hover {
+  background: #dbeafe;
+}
+
+/* BANNIÈRES & ALERTES */
+.banner {
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.success-banner {
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+}
+
+/* BOUTON SAUVEGARDER */
+.save-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-save {
+  width: 100%;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  transition: all 0.2s;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.btn-save:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ÉTAT DE CHARGEMENT */
+.loading-state {
+  text-align: center;
+  padding: 5rem 1rem;
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(37, 99, 235, 0.2);
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1rem auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Conteneur de la liste */
+.regions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+/* Alignement champ + bouton */
+.region-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Style de l'input */
+.region-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #dcdfe6;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.region-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Style du bouton supprimer (comme dans l'image 2) */
+.btn-delete-region {
+  width: 42px;
+  height: 42px;
+  background-color: #fff1f1;
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  color: #dc2626;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-delete-region:hover {
+  background-color: #fee2e2;
+  border-color: #f87171;
+  transform: scale(1.03);
+}
+
+/* Style du bouton d'ajout */
+.btn-add-region {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-add-region:hover {
+  background-color: #dcfce7;
+}
+
+/* Style du conteneur parent par élément */
+.region-item-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Style de l'input quand un doublon est détecté */
+.region-input.is-duplicate {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+/* Style du texte d'avertissement rouge */
+.duplicate-warning {
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 4px;
+}

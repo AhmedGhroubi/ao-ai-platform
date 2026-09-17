@@ -1,73 +1,125 @@
 <div class="list-container">
-  <h2>📋 Liste des Appels d'Offres</h2>
   
-  <button routerLink="/upload" style="margin-bottom: 15px; padding: 10px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 4px;">
-    + Analyser un nouveau PDF
-  </button>
+  <!-- EN-TÊTE ET ACTIONS -->
+  <header class="list-header">
+    <div class="header-text">
+      <span class="welcome-badge">📋 Gestion Projets</span>
+      <h1>Liste des Appels d'Offres</h1>
+      <p class="subtitle">Gérez vos appels d'offres, suivez l'analyse IA et accédez directement aux équipes générées.</p>
+    </div>
+    <div class="header-actions">
+      <!-- BOUTON RETOUR AU DASHBOARD -->
+      <button class="btn-secondary" routerLink="/dashboard">
+        🏠 Tableau de bord
+      </button>
 
-  <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
-    <thead>
-      <tr style="background-color: #f2f2f2;">
-        <th style="padding: 10px; width: 60px;">N°</th>
-        <th style="padding: 10px;">Titre de l'Appel d'Offres</th>
-        <th style="padding: 10px;">Date d'ajout</th>
-        <th style="padding: 10px;">Statut</th>
-        <th style="padding: 10px;">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let tender of tenders; let i = index">
-        
-        <td style="padding: 10px;">{{ i + 1 }}</td>
-        
-        <td style="padding: 10px;">{{ tender.title || tender.reference }}</td>
-        
-        <td style="padding: 10px;">
-          {{ tender.created_at | date:'dd/MM/yyyy HH:mm' }}
-        </td>
-        
-       <td style="padding: 10px;">
-        <span *ngIf="tender.status === 'Analysé' || tender.extracted_data" style="color: green; font-weight: bold;">
-          ✔ Analysé
-        </span>
-        
-        <span *ngIf="tender.status === 'En cours'" style="color: #FF9800; font-weight: bold;" class="loading-status">
-          ⚙️ Analyse IA en cours...
-        </span>
-        
-        <span *ngIf="tender.status === 'En attente' && !tender.extracted_data" style="color: red;">
-          ⏳ En attente
-        </span>
-      </td>
-        
-        <td style="padding: 10px;">
-  
-        <ng-container *ngIf="tender.status !== 'En cours'">
-          <button [routerLink]="['/details', tender.id]" style="margin-right: 10px; padding: 6px 12px; cursor: pointer; background-color: #9C27B0; color: white; border: none; border-radius: 4px;">
-            👁️ Détails
-          </button>
+      <!-- BOUTON NOUVEL AO -->
+      <button class="btn-primary" routerLink="/upload">
+        ➕ Analyser un nouveau PDF
+      </button>
+    </div>
+  </header>
 
-          <button [routerLink]="['/editor', tender.id]" style="margin-right: 10px; padding: 6px 12px; cursor: pointer; background-color: #2196F3; color: white; border: none; border-radius: 4px;">
-            ✏️ Modifier
-          </button>
+  <!-- CARTE TABLEAU -->
+  <div class="table-card">
+    <table class="tender-table">
+      <thead>
+        <tr>
+          <th class="col-index">N°</th>
+          <th>Titre de l'Appel d'Offres</th>
+          <th>Date d'ajout</th>
+          <th>Statut Analyse</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tender of tenders; let i = index">
+          
+          <!-- INDEX -->
+          <td class="col-index font-bold">{{ i + 1 }}</td>
+          
+          <!-- TITRE ET REFERENCE -->
+          <td>
+            <div class="tender-title-cell">
+              <strong>{{ tender.title || tender.reference || 'Appel d\'offres sans titre' }}</strong>
+              <span class="tender-ref" *ngIf="tender.reference && tender.title">{{ tender.reference }}</span>
+            </div>
+          </td>
+          
+          <!-- DATE -->
+          <td class="date-cell">
+            {{ tender.created_at | date:'dd/MM/yyyy HH:mm' }}
+          </td>
+          
+          <!-- STATUT -->
+          <td>
+            <span *ngIf="tender.status === 'Analysé' || tender.extracted_data" class="status-badge status-success">
+              ✔ Analysé
+            </span>
+            
+            <span *ngIf="tender.status === 'En cours'" class="status-badge status-warning loading-pulse">
+              ⚙️ Analyse IA...
+            </span>
+            
+            <span *ngIf="tender.status === 'En attente' && !tender.extracted_data" class="status-badge status-danger">
+              ⏳ En attente
+            </span>
+          </td>
+          
+          <!-- ACTIONS -->
+          <td class="text-end">
+            <!-- Actions si l'AO n'est pas en cours -->
+            <div class="action-buttons-group" *ngIf="tender.status !== 'En cours'">
+              
+              <button 
+                [routerLink]="['/staffing', tender.id || tender.tender_id]" 
+                class="btn-action btn-staffing" 
+                title="Consulter ou générer l'équipe IA">
+                ⚡ Équipe IA
+              </button>
 
-          <button (click)="deleteTender(tender.id)" style="padding: 6px 12px; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 4px;">
-            🗑️ Supprimer
-          </button>
-        </ng-container>
+              <button 
+                [routerLink]="['/details', tender.id || tender.tender_id]" 
+                class="btn-action btn-details" 
+                title="Voir le détail des profils">
+                👁️ Voir
+              </button>
 
-        <button *ngIf="tender.status === 'En cours'" (click)="cancelAnalysis(tender.id)" style="padding: 6px 12px; cursor: pointer; background-color: #FF9800; color: white; border: none; border-radius: 4px;">
-          🛑 Annuler l'analyse
-        </button>
+              <button 
+                [routerLink]="['/editor', tender.id || tender.tender_id]" 
+                class="btn-action btn-edit" 
+                title="Modifier les critères">
+                ✏️ Éditer
+              </button>
 
-      </td>
-      </tr>
-      
-      <tr *ngIf="tenders.length === 0">
-        <td colspan="5" style="text-align: center; padding: 20px; font-style: italic; color: #666;">
-          Aucun appel d'offres pour le moment.
-        </td>
-      </tr>
-    </tbody>
-  </table>
+              <button 
+                (click)="deleteTender(tender.id || tender.tender_id)" 
+                class="btn-action btn-delete" 
+                title="Supprimer">
+                🗑️
+              </button>
+
+            </div>
+
+            <!-- Action si en cours d'analyse -->
+            <button 
+              *ngIf="tender.status === 'En cours'" 
+              (click)="cancelAnalysis(tender.id || tender.tender_id)" 
+              class="btn-action btn-cancel">
+              🛑 Annuler l'analyse
+            </button>
+          </td>
+
+        </tr>
+        
+        <!-- MSG SI AUCUNE DONNÉE -->
+        <tr *ngIf="tenders.length === 0">
+          <td colspan="5" class="empty-table-msg">
+            📂 Aucun appel d'offres enregistre pour le moment. Cliquez sur <strong>"Analyser un nouveau PDF"</strong> pour commencer.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
 </div>

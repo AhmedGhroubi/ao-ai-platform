@@ -1,184 +1,251 @@
-<div class="edit-container" style="max-width: 1100px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+<div class="edit-container">
   
-  <form [formGroup]="editForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+  <form [formGroup]="editForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading" class="edit-form">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-      <h2 style="color: #333; margin: 0;">✏️ Modification du profil : {{ editForm.value.nom_expert }}</h2>
-      <div>
-        <button type="button" [routerLink]="['/experts/details', expertId]" style="padding: 10px 20px; margin-right: 10px; cursor: pointer; background: #eee; border: none; border-radius: 4px;">Annuler</button>
-        <button type="submit" [disabled]="isSaving" style="padding: 10px 25px; cursor: pointer; background: #4CAF50; color: white; border: none; border-radius: 4px; font-weight: bold;">
-          {{ isSaving ? 'Enregistrement...' : '💾 Enregistrer les modifications' }}
+    <!-- EN-TÊTE DU FORMULAIRE ET ACTIONS SIGHT -->
+    <header class="edit-header">
+      <div class="header-title">
+        <span class="edit-badge">✏️ Mode Édition</span>
+        <h1>Modification du profil : {{ editForm.value.nom_expert || 'Nouvel expert' }}</h1>
+      </div>
+      <div class="header-actions">
+        <button type="button" [routerLink]="['/experts/details', expertId]" class="btn-secondary">
+          Annuler
+        </button>
+        <button type="submit" [disabled]="isSaving" class="btn-save">
+          <span *ngIf="isSaving">⏳ Enregistrement...</span>
+          <span *ngIf="!isSaving">💾 Enregistrer les modifications</span>
         </button>
       </div>
-    </div>
+    </header>
 
-    <!-- ── SECTION IDENTITÉ ── -->
-    <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px;">
+    <!-- ── SECTION 1 : IDENTITÉ & INFORMATIONS GÉNÉRALES ── -->
+    <div class="card section-card card-blue">
       
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e3f2fd; padding-bottom: 10px; margin-bottom: 15px;">
-        <h3 style="color: #2196F3; margin: 0;">🌐 Informations Générales</h3>
-        <button type="button" (click)="reanalyzeSection('identite')" [disabled]="isAnalyzingSection === 'identite'" style="padding: 6px 12px; background: #e3f2fd; color: #1976d2; border: 1px solid #90caf9; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
+      <div class="section-header">
+        <h2 class="section-title text-blue">🌐 Informations Générales</h2>
+        <button 
+          type="button" 
+          (click)="reanalyzeSection('identite')" 
+          [disabled]="isAnalyzingSection === 'identite'" 
+          class="btn-ai btn-ai-blue">
           <span *ngIf="isAnalyzingSection === 'identite'">⏳ Extraction IA...</span>
           <span *ngIf="isAnalyzingSection !== 'identite'">🔄 Ré-extraire avec l'IA</span>
         </button>
       </div>
       
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+      <div class="form-grid grid-2-cols">
         
-        <div>
-          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Nom de l'expert</label>
-          <input type="text" formControlName="nom_expert" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        <div class="form-group">
+          <label class="form-label">Nom de l'expert</label>
+          <input type="text" formControlName="nom_expert" class="form-control" placeholder="ex: Jean Dupont">
         </div>
 
-        <div>
-          <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #d32f2f; display: flex; justify-content: space-between;">
-            <span>🔗 Slug (Identifiant URL)</span>
-            <span (click)="regenererSlugManuel()" style="color: #2196F3; cursor: pointer; font-size: 11px; text-decoration: underline;">
+        <div class="form-group slug-group">
+          <div class="label-with-action">
+            <label class="form-label text-danger">🔗 Slug (Identifiant URL)</label>
+            <button type="button" (click)="regenererSlugManuel()" class="btn-inline-action">
               🔄 Générer automatiquement
-            </span>
-          </label>
-          <input type="text" formControlName="slug_unique" placeholder="ex: loulou-rami-1964" style="width: 100%; padding: 8px; border: 1px solid #ef9a9a; border-radius: 4px; background-color: #ffebee;">
-          <small style="color: #666; font-size: 11px;">Ce champ doit être unique dans la base de données.</small>
+            </button>
+          </div>
+          <input type="text" formControlName="slug_unique" placeholder="ex: jean-dupont-1980" class="form-control form-control-slug">
+          <span class="helper-text">Ce champ doit être unique dans la base de données.</span>
         </div>
 
         <ng-container formGroupName="extracted_data">
-          <div>
-            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Titre du poste principal</label>
-            <input type="text" formControlName="titre_poste_principal" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+          <div class="form-group">
+            <label class="form-label">Titre du poste principal</label>
+            <input type="text" formControlName="titre_poste_principal" class="form-control" placeholder="ex: Expert SIG Senior">
           </div>
-          <div>
-            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Années d'expérience</label>
-            <input type="number" formControlName="annees_experience_total" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+          
+          <div class="form-group">
+            <label class="form-label">Années d'expérience</label>
+            <input type="number" formControlName="annees_experience_total" class="form-control" placeholder="ex: 12">
           </div>
-          <div>
-            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Nationalité</label>
-            <input type="text" formControlName="nationalite" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+          
+          <div class="form-group">
+            <label class="form-label">Nationalité</label>
+            <input type="text" formControlName="nationalite" class="form-control" placeholder="ex: Tunisienne">
           </div>
-          <div>
-            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Date de naissance</label>
-            <input type="text" formControlName="date_naissance" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+          
+          <div class="form-group">
+            <label class="form-label">Date de naissance</label>
+            <input type="text" formControlName="date_naissance" class="form-control" placeholder="ex: 14/05/1982">
           </div>
         </ng-container>
 
       </div>
     </div>
 
-    <!-- ── SECTION LANGUES & COMPÉTENCES ── -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px;" formGroupName="extracted_data">
-      <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-        <h3 style="color: #e65100;">🗣 Langues</h3>
-        <div formArrayName="langues">
-          <div *ngFor="let l of langues.controls; let i=index" style="display: flex; margin-bottom: 8px;">
-            <input [formControlName]="i" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            <button type="button" (click)="removeItem(langues, i)" style="margin-left: 5px; background: #ffcdd2; border: none; color: #b71c1c; cursor: pointer; padding: 0 10px; border-radius: 4px;">✕</button>
+    <!-- ── SECTION 2 : LANGUES, COMPÉTENCES & CERTIFICATIONS ── -->
+    <div class="grid-3-cols" formGroupName="extracted_data">
+      
+      <!-- CARD LANGUES -->
+      <div class="card sub-card card-orange">
+        <h3 class="card-subtitle text-orange">🗣 Langues</h3>
+        <div formArrayName="langues" class="array-container">
+          <div *ngFor="let l of langues.controls; let i=index" class="array-row">
+            <input [formControlName]="i" placeholder="ex: Français, Anglais" class="form-control">
+            <button type="button" (click)="removeItem(langues, i)" class="btn-icon-delete" title="Supprimer">✕</button>
           </div>
-          <button type="button" (click)="addItem(langues)" style="margin-top: 10px; background: #e3f2fd; border: 1px dashed #2196F3; width: 100%; padding: 8px; cursor: pointer;">+ Ajouter une langue</button>
+          <button type="button" (click)="addItem(langues)" class="btn-add btn-add-orange">
+            + Ajouter une langue
+          </button>
         </div>
       </div>
 
-      <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-        <h3 style="color: #2e7d32;">💻 Compétences Techniques</h3>
-        <div formArrayName="competences_techniques">
-          <div *ngFor="let c of competences.controls; let i=index" style="display: flex; margin-bottom: 8px;">
-            <input [formControlName]="i" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            <button type="button" (click)="removeItem(competences, i)" style="margin-left: 5px; background: #ffcdd2; border: none; color: #b71c1c; cursor: pointer; padding: 0 10px; border-radius: 4px;">✕</button>
+      <!-- CARD COMPÉTENCES -->
+      <div class="card sub-card card-emerald">
+        <h3 class="card-subtitle text-emerald">💻 Compétences Techniques</h3>
+        <div formArrayName="competences_techniques" class="array-container">
+          <div *ngFor="let c of competences.controls; let i=index" class="array-row">
+            <input [formControlName]="i" placeholder="ex: Python, Docker, PostgreSQL" class="form-control">
+            <button type="button" (click)="removeItem(competences, i)" class="btn-icon-delete" title="Supprimer">✕</button>
           </div>
-          <button type="button" (click)="addItem(competences)" style="margin-top: 10px; background: #e8f5e9; border: 1px dashed #2e7d32; width: 100%; padding: 8px; cursor: pointer;">+ Ajouter une compétence</button>
+          <button type="button" (click)="addItem(competences)" class="btn-add btn-add-emerald">
+            + Ajouter une compétence
+          </button>
         </div>
       </div>
+
+      <!-- CARD CERTIFICATIONS -->
+      <div class="card sub-card card-purple">
+        <h3 class="card-subtitle text-purple">📜 Certifications</h3>
+        <div formArrayName="certifications" class="array-container">
+          <div *ngFor="let cert of certifications.controls; let i=index" class="array-row">
+            <input [formControlName]="i" placeholder="ex: PMP, Scrum Master" class="form-control">
+            <button type="button" (click)="removeItem(certifications, i)" class="btn-icon-delete" title="Supprimer">✕</button>
+          </div>
+          <button type="button" (click)="addItem(certifications)" class="btn-add btn-add-purple">
+            + Ajouter une certification
+          </button>
+        </div>
+      </div>
+
     </div>
 
-    <!-- ── SECTION EXPÉRIENCES ── -->
-    <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px;">
+    <!-- ── SECTION 3 : PARCOURS PROFESSIONNEL ── -->
+    <div class="card section-card card-purple-accent">
       
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3 style="color: #9C27B0; margin: 0;">💼 Parcours Professionnel</h3>
-        <button type="button" (click)="reanalyzeSection('experiences')" [disabled]="isAnalyzingSection === 'experiences'" style="padding: 6px 12px; background: #f3e5f5; color: #7b1fa2; border: 1px solid #ce93d8; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
+      <div class="section-header">
+        <h2 class="section-title text-purple">💼 Parcours Professionnel</h2>
+        <button 
+          type="button" 
+          (click)="reanalyzeSection('experiences')" 
+          [disabled]="isAnalyzingSection === 'experiences'" 
+          class="btn-ai btn-ai-purple">
           <span *ngIf="isAnalyzingSection === 'experiences'">⏳ Extraction IA...</span>
           <span *ngIf="isAnalyzingSection !== 'experiences'">🔄 Ré-extraire avec l'IA</span>
         </button>
       </div>
 
       <div formGroupName="extracted_data">
-        <div formArrayName="experiences_professionnelles">
-          <div *ngFor="let exp of experiences.controls; let i=index" [formGroupName]="i" style="border: 1px solid #eee; padding: 20px; border-radius: 8px; margin-bottom: 20px; position: relative; background: #fafafa;">
-            <button type="button" (click)="removeItem(experiences, i)" style="position: absolute; top: 10px; right: 10px; background: #f44336; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;">✕</button>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-              <input formControlName="poste" placeholder="Poste occupé" style="padding: 8px;">
-              <input formControlName="periode" placeholder="Période (ex: 2018-2022)" style="padding: 8px;">
-              <input formControlName="employeur" placeholder="Employeur" style="padding: 8px;">
-              <input formControlName="pays" placeholder="Pays" style="padding: 8px;">
+        <div formArrayName="experiences_professionnelles" class="dynamic-list">
+          
+          <div *ngFor="let exp of experiences.controls; let i=index" [formGroupName]="i" class="dynamic-item-card">
+            <button type="button" (click)="removeItem(experiences, i)" class="btn-card-delete" title="Supprimer cette expérience">✕</button>
+            
+            <div class="form-grid grid-2-cols mb-1rem">
+              <div class="form-group">
+                <label class="form-label">Poste occupé</label>
+                <input formControlName="poste" placeholder="ex: Chef de Projet SIG" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Période</label>
+                <input formControlName="periode" placeholder="ex: 2018 - 2022" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Employeur</label>
+                <input formControlName="employeur" placeholder="ex: Ministères des Finances" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Pays</label>
+                <input formControlName="pays" placeholder="ex: Tunisie" class="form-control">
+              </div>
             </div>
-            <label style="font-weight: bold; font-size: 13px;">Activités réalisées (une par ligne) :</label>
-            <textarea formControlName="resume_activites" rows="4" style="width: 100%; margin-top: 5px; padding: 8px; border-radius: 4px; border: 1px solid #ccc;"></textarea>
+
+            <div class="form-group">
+              <label class="form-label">Activités réalisées <span class="sub-label">(une par ligne)</span></label>
+              <textarea formControlName="resume_activites" rows="4" class="form-control textarea-control" placeholder="Détaillez les tâches et réalisations..."></textarea>
+            </div>
           </div>
-          <button type="button" (click)="addItem(experiences, {poste:'', periode:'', employeur:'', pays:'', resume_activites:''})" style="width: 100%; padding: 12px; background: #f3e5f5; border: 1px dashed #9C27B0; cursor: pointer; font-weight: bold;">+ Ajouter une expérience</button>
+
+          <button type="button" (click)="addItem(experiences, {poste:'', periode:'', employeur:'', pays:'', resume_activites:''})" class="btn-add btn-add-full btn-add-purple">
+            + Ajouter une expérience professionnelle
+          </button>
+
         </div>
       </div>
     </div>
     
-    <!-- ── SECTION PROJETS ── -->
-    <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px;">
+    <!-- ── SECTION 4 : PROJETS & MISSIONS ── -->
+    <div class="card section-card card-teal-accent">
       
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3 style="color: #009688; margin: 0;">📁 Projets & Missions</h3>
-        <button type="button" (click)="reanalyzeSection('projets')" [disabled]="isAnalyzingSection === 'projets'" style="padding: 6px 12px; background: #e0f2f1; color: #00796b; border: 1px solid #80cbc4; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
+      <div class="section-header">
+        <h2 class="section-title text-teal">📁 Projets & Missions</h2>
+        <button 
+          type="button" 
+          (click)="reanalyzeSection('projets')" 
+          [disabled]="isAnalyzingSection === 'projets'" 
+          class="btn-ai btn-ai-teal">
           <span *ngIf="isAnalyzingSection === 'projets'">⏳ Extraction IA...</span>
           <span *ngIf="isAnalyzingSection !== 'projets'">🔄 Ré-extraire avec l'IA</span>
         </button>
       </div>
 
       <div formGroupName="extracted_data">
-        <div formArrayName="projets_et_missions">
+        <div formArrayName="projets_et_missions" class="dynamic-list">
           
-          <div *ngFor="let proj of projets.controls; let i=index" [formGroupName]="i" style="border: 1px solid #eee; padding: 20px; border-radius: 8px; margin-bottom: 20px; position: relative; background: #fafafa;">
+          <div *ngFor="let proj of projets.controls; let i=index" [formGroupName]="i" class="dynamic-item-card">
+            <button type="button" (click)="removeItem(projets, i)" class="btn-card-delete" title="Supprimer ce projet">✕</button>
             
-            <button type="button" (click)="removeItem(projets, i)" style="position: absolute; top: 10px; right: 10px; background: #f44336; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;">✕</button>
-            
-            <div style="margin-bottom: 15px; padding-right: 35px;">
-              <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px;">Nom complet du projet :</label>
-              <textarea formControlName="nom_projet" rows="2" placeholder="Saisir l'intitulé complet du projet..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box;"></textarea>
+            <div class="form-group mb-1rem pr-30">
+              <label class="form-label">Nom complet du projet</label>
+              <textarea formControlName="nom_projet" rows="2" placeholder="Saisir l'intitulé complet du projet de référence..." class="form-control textarea-control"></textarea>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-              <div>
-                <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px;">Rôle / Poste occupé :</label>
-                <input formControlName="poste_occupe" placeholder="ex: Expert SIG, Chef de projet" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box;">
+            <div class="form-grid grid-4-cols">
+              <div class="form-group">
+                <label class="form-label">Rôle / Poste occupé</label>
+                <input formControlName="poste_occupe" placeholder="ex: Expert SIG" class="form-control">
               </div>
-              
-              <div>
-                <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px;">Client ou Bailleur :</label>
-                <input formControlName="client_ou_bailleur" placeholder="ex: Banque mondiale, GIZ, ST2I" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box;">
+              <div class="form-group">
+                <label class="form-label">Client ou Bailleur</label>
+                <input formControlName="client_ou_bailleur" placeholder="ex: Banque Mondiale" class="form-control">
               </div>
-
-              <div>
-                <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px;">Année(s) :</label>
-                <input formControlName="annee" placeholder="ex: 2024 ou 2015-2018" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box;">
+              <div class="form-group">
+                <label class="form-label">Année(s)</label>
+                <input formControlName="annee" placeholder="ex: 2023 - 2024" class="form-control">
               </div>
-
-              <div>
-                <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px;">Pays d'intervention :</label>
-                <input formControlName="pays" placeholder="ex: Tunisie, Niger, Tchad" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box;">
+              <div class="form-group">
+                <label class="form-label">Pays d'intervention</label>
+                <input formControlName="pays" placeholder="ex: Niger" class="form-control">
               </div>
             </div>
 
           </div>
-          <button type="button" (click)="addItem(projets, {nom_projet:'', client_ou_bailleur:'', annee:'', pays:'', poste_occupe:''})" style="width: 100%; padding: 12px; background: #e0f2f1; border: 1px dashed #009688; color: #00796b; cursor: pointer; font-weight: bold; font-size: 14px; border-radius: 4px;">
+
+          <button type="button" (click)="addItem(projets, {nom_projet:'', client_ou_bailleur:'', annee:'', pays:'', poste_occupe:''})" class="btn-add btn-add-full btn-add-teal">
             + Ajouter un projet ou une mission de référence
           </button>
+
         </div>
       </div>
     </div>
 
-    <div style="text-align: right; padding-bottom: 50px;">
-        <button type="submit" [disabled]="isSaving" style="padding: 15px 40px; cursor: pointer; background: #4CAF50; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            💾 Enregistrer toutes les modifications
-        </button>
+    <!-- PIED DE PAGE ET ENREGISTREMENT -->
+    <div class="form-footer">
+      <button type="submit" [disabled]="isSaving" class="btn-save btn-save-large">
+        💾 Enregistrer toutes les modifications
+      </button>
     </div>
 
   </form>
 
-  <div *ngIf="isLoading" style="text-align: center; padding: 100px;">
-    ⏳ Chargement du formulaire...
+  <!-- ÉTAT DE CHARGEMENT INITIAL -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>⏳ Chargement du formulaire d'édition...</p>
   </div>
+
 </div>

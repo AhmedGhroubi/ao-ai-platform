@@ -1,0 +1,269 @@
+/* CONTAINER PRINCIPAL */
+.upload-wrapper {
+  padding: 2rem 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #1e293b;
+}
+
+/* CARTE GÉNÉRIQUE */
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* CARTE D'UPLOAD EN-TÊTE */
+.upload-card {
+  max-width: 580px;
+  margin: 0 auto 2rem auto;
+  border-top: 5px solid #2563eb;
+}
+
+.nav-bar {
+  margin-bottom: 1.5rem;
+}
+
+/* BOUTONS GENERIQUES */
+.btn-secondary {
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-secondary:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* EN-TÊTE DE LA CARTE */
+.upload-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.upload-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.upload-header h2 {
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.upload-subtitle {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ZONE DE SÉLECTION DU FICHIER */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #334155;
+  font-size: 0.875rem;
+}
+
+.dropzone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  background-color: #f8fafc;
+  transition: all 0.2s ease-in-out;
+}
+
+.dropzone:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.dropzone.has-file {
+  border-style: solid;
+  border-color: #bfdbfe;
+  background-color: #eff6ff;
+}
+
+.file-input {
+  width: 100%;
+  cursor: pointer;
+  color: #334155;
+  font-size: 0.875rem;
+}
+
+/* BADGE DU FICHIER SÉLECTIONNÉ */
+.file-chip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.file-name {
+  color: #1d4ed8;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  flex-grow: 1;
+  text-align: left;
+}
+
+.btn-remove-file {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 4px;
+  margin-left: 10px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.btn-remove-file:hover {
+  color: #b91c1c;
+  background: #fef2f2;
+}
+
+/* ALERTE ET STATUTS DINAMIQUES */
+.status-alert {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.status-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.status-title {
+  font-size: 0.9rem;
+}
+
+.status-subtext {
+  font-size: 0.775rem;
+  opacity: 0.85;
+}
+
+.status-success {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+
+.status-error {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.status-pending {
+  background-color: #fffbeb;
+  border-color: #fde68a;
+  color: #b45309;
+}
+
+/* ACTIONS */
+.actions-row {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn-clear {
+  flex: 1;
+  padding: 12px;
+  font-size: 0.95rem;
+}
+
+.btn-submit {
+  flex: 2;
+}
+
+/* CARTE RÉSULTATS (JSON) */
+.results-card {
+  border-left: 6px solid #10b981;
+}
+
+.results-title {
+  margin: 0 0 0.5rem 0;
+  color: #0f172a;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.results-subtitle {
+  margin: 0 0 1.25rem 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.json-preview {
+  background: #0f172a;
+  color: #38bdf8;
+  padding: 1.25rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  font-family: 'Fira Code', Monaco, Consolas, 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  border: 1px solid #1e293b;
+  margin: 0;
+}
